@@ -14,15 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef RISC_V_SIMULATOR_INCLUDE_TYPE_H
-#define RISC_V_SIMULATOR_INCLUDE_TYPE_H
+#ifndef RISC_V_SIMULATOR_INCLUDE_MEMORY_H
+#define RISC_V_SIMULATOR_INCLUDE_MEMORY_H
 
-#include <cstddef>
-#include <cstdint>
+#include "type.h"
 
-using WordType = uint32_t;
-using SizeType = uint32_t;
-using HalfWordType = uint16_t;
-using ByteType = uint8_t;
+class Memory {
+public:
+    explicit Memory(SizeType size);
+    ~Memory();
 
-#endif //RISC_V_SIMULATOR_INCLUDE_TYPE_H
+    [[nodiscard]] WordType ReadWord(SizeType index) const;
+    [[nodiscard]] HalfWordType ReadHalfWord(SizeType index) const;
+    [[nodiscard]] ByteType ReadByte(SizeType index) const;
+
+    void StoreWord(SizeType index, WordType value);
+    void StoreHalfWord(SizeType index, HalfWordType value);
+    void StoreByte(SizeType index, ByteType value);
+
+private:
+    ByteType* memory_;
+};
+
+#endif //RISC_V_SIMULATOR_INCLUDE_MEMORY_H

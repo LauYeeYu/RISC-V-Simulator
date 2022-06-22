@@ -91,7 +91,7 @@ simulator that can simulate simplified RV32I instructions.
 
 ## License 許可證
 
-Lau CPP Library - to strengthen the ability of C++ STL
+RISC-V Simulator
 
 Copyright (C) 2022  Lau Yee-Yu
 

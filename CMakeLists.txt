@@ -8,7 +8,7 @@ set(SIMULATOR_INCLUDES
         include)
 
 set(SIMULATOR_SOURCES
-        src/main.cpp)
+        src/main.cpp src/register.cpp)
 
 add_executable(code ${SIMULATOR_INCLUDES} ${SIMULATOR_SOURCES})
 target_include_directories(code PRIVATE ${SIMULATOR_INCLUDES})

@@ -16,6 +16,9 @@
 
 #include "memory.h"
 
+#include <iostream>
+#include <string>
+
 Memory::Memory(SizeType size) {
     memory_ = new ByteType[size];
 }
@@ -46,4 +49,18 @@ void Memory::StoreHalfWord(SizeType index, HalfWordType value) {
 
 void Memory::StoreByte(SizeType index, ByteType value) {
     memory_[index] = value;
+}
+
+void Memory::Init() {
+    std::string token;
+    ByteType address = 0;
+while (std::cin >> token) {
+        if (token[0] == '@') {
+            std::string address_str = token.substr(1);
+            address = std::stoi(address_str, nullptr, 16);
+        } else {
+            memory_[address] = static_cast<ByteType>(std::stoi(token, nullptr, 16));
+            ++address;
+        }
+    }
 }

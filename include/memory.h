@@ -32,6 +32,11 @@ public:
     void StoreHalfWord(SizeType index, HalfWordType value);
     void StoreByte(SizeType index, ByteType value);
 
+    /**
+     * Init from stdin.
+     */
+    void Init();
+
 private:
     ByteType* memory_;
 };

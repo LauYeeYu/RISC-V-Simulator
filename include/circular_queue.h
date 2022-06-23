@@ -53,6 +53,10 @@ public:
         head_ = (head_ + 1) % kSize;
     }
 
+    T& Front() {
+        return queue_[head_];
+    }
+
     /**
      * Get the element at the head of the queue by absolute index.
      * @return the element at the head of the queue.

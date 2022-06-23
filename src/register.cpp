@@ -20,26 +20,33 @@ Register::operator WordType&() {
     return value_;
 }
 
-bool Register::SetStall(bool stall) {
-    stall_ = stall;
-    return stall_;
-}
-
-bool Register::Stall() const { return stall_; }
-
 Register& Register::operator=(WordType data) {
     value_ = data;
     return *this;
 }
 
-WordType RegisterSet::Read(SizeType index) {
-    return registers_[index];
+bool Register::Dirty() const { return dirty_; }
+
+void Register::SetDependency(SizeType index) {
+    dependency_ = index;
+    dirty_ = true;
 }
 
-WordType RegisterSet::Write(SizeType index, WordType value) {
-    if (index == 0) {
-        return 0;
-    } else {
-        return registers_[index] = value;
+void Register::TryResetWithIndex(SizeType index) {
+    if (index == dependency_) {
+        dirty_ = false;
     }
+}
+
+WordType RegisterFile::Read(SizeType index) { return static_cast<WordType>(registers_[index]); }
+
+void RegisterFile::Write(SizeType index, WordType value, SizeType dependency) {
+    if (index != 0) {
+        registers_[index] = value;
+        registers_[index].TryResetWithIndex(dependency);
+    }
+}
+
+void RegisterFile::AboutToWrite(SizeType index, SizeType dependency) {
+    registers_[index].SetDependency(dependency);
 }

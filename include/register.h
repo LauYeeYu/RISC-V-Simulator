@@ -37,32 +37,26 @@ public:
      */
     operator WordType&();
 
-    /**
-     * Get the stall status of the register.
-     * @return the stall status of the register.
-     */
-    [[nodiscard]] bool Stall() const;
+    [[nodiscard]] bool Dirty() const;
 
-    /**
-     * Set the stall status of the register.
-     * @param stall
-     * @return
-     */
-    bool SetStall(bool stall);
+    void SetDependency(SizeType index);
+
+    void TryResetWithIndex(SizeType index);
 
 private:
-    WordType value_ = 0;
-    bool     stall_ = false;
+    WordType value_      = 0;
+    bool     dirty_      = false;
+    WordType dependency_ = 0;
 };
 
-class RegisterSet {
+class RegisterFile {
 public:
-    RegisterSet() = default;
-    RegisterSet(const RegisterSet&) = default;
-    RegisterSet(RegisterSet&&) = default;
-    RegisterSet& operator=(const RegisterSet&) = default;
-    RegisterSet& operator=(RegisterSet&&) = default;
-    ~RegisterSet() = default;
+    RegisterFile() = default;
+    RegisterFile(const RegisterFile&) = default;
+    RegisterFile(RegisterFile&&) = default;
+    RegisterFile& operator=(const RegisterFile&) = default;
+    RegisterFile& operator=(RegisterFile&&) = default;
+    ~RegisterFile() = default;
 
     /**
      * Get the register by index.
@@ -71,7 +65,9 @@ public:
      */
     [[nodiscard]] WordType Read(SizeType index);
 
-    WordType Write(SizeType index, WordType value);
+    void Write(SizeType index, WordType value, SizeType dependency);
+
+    void AboutToWrite(SizeType index, SizeType dependency);
 
 private:
     Register registers_[32];

@@ -28,26 +28,32 @@ Memory::~Memory() {
 }
 
 WordType Memory::ReadWord(SizeType index) const {
+    ready_ = false;
     return *(reinterpret_cast<WordType*>(memory_ + index));
 }
 
 HalfWordType Memory::ReadHalfWord(SizeType index) const {
+    ready_ = false;
     return *(reinterpret_cast<HalfWordType*>(memory_ + index));
 }
 
 ByteType Memory::ReadByte(SizeType index) const {
+    ready_ = false;
     return *(memory_ + index);
 }
 
 void Memory::StoreWord(SizeType index, WordType value) {
+    ready_ = false;
     *(reinterpret_cast<WordType*>(memory_ + index)) = value;
 }
 
 void Memory::StoreHalfWord(SizeType index, HalfWordType value) {
+    ready_ = false;
     *(reinterpret_cast<HalfWordType*>(memory_ + index)) = value;
 }
 
 void Memory::StoreByte(SizeType index, ByteType value) {
+    ready_ = false;
     memory_[index] = value;
 }
 
@@ -63,4 +69,12 @@ while (std::cin >> token) {
             ++address;
         }
     }
+}
+
+void Memory::ResetReadyState() {
+    ready_ = true;
+}
+
+bool Memory::Ready() const {
+    return ready_;
 }

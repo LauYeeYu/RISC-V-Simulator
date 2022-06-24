@@ -38,6 +38,10 @@ void Register::TryResetWithIndex(SizeType index) {
     }
 }
 
+void Register::ResetDependency() {
+    dirty_ = false;
+}
+
 WordType RegisterFile::Read(SizeType index) { return static_cast<WordType>(registers_[index]); }
 
 void RegisterFile::Write(SizeType index, WordType value, SizeType dependency) {
@@ -49,4 +53,10 @@ void RegisterFile::Write(SizeType index, WordType value, SizeType dependency) {
 
 void RegisterFile::AboutToWrite(SizeType index, SizeType dependency) {
     registers_[index].SetDependency(dependency);
+}
+
+void RegisterFile::ResetDependency() {
+    for (auto& register_ : registers_) {
+        register_.ResetDependency();
+    }
 }

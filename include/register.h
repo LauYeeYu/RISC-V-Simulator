@@ -43,6 +43,8 @@ public:
 
     void TryResetWithIndex(SizeType index);
 
+    void ResetDependency();
+
 private:
     WordType value_      = 0;
     bool     dirty_      = false;
@@ -68,6 +70,8 @@ public:
     void Write(SizeType index, WordType value, SizeType dependency);
 
     void AboutToWrite(SizeType index, SizeType dependency);
+
+    void ResetDependency();
 
 private:
     Register registers_[32];

@@ -46,17 +46,17 @@ WordType RegisterFile::Read(SizeType index) { return static_cast<WordType>(regis
 
 void RegisterFile::Write(SizeType index, WordType value, SizeType dependency) {
     if (index != 0) {
-        registers_[index] = value;
-        registers_[index].TryResetWithIndex(dependency);
+        nextRegisters_[index] = value;
+        nextRegisters_[index].TryResetWithIndex(dependency);
     }
 }
 
 void RegisterFile::AboutToWrite(SizeType index, SizeType dependency) {
-    registers_[index].SetDependency(dependency);
+    nextRegisters_[index].SetDependency(dependency);
 }
 
 void RegisterFile::ResetDependency() {
-    for (auto& register_ : registers_) {
+    for (auto& register_ : nextRegisters_) {
         register_.ResetDependency();
     }
 }

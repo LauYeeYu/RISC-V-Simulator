@@ -75,6 +75,7 @@ public:
 
 private:
     Register registers_[32];
+    Register nextRegisters_[32];
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_REGISTER_H

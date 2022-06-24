@@ -65,9 +65,9 @@ simulator that can simulate simplified RV32I instructions.
 |         imm[11:0]          |     rs1     | 010 |     rd      | 0000011 | LW
 |         imm[11:0]          |     rs1     | 100 |     rd      | 0000011 | LBU
 |         imm[11:0]          |     rs1     | 101 |     rd      | 0000011 | LHU
-| imm[12|10:5] |     rs2     |     rs1     | 000 |  imm[4:0]   | 0100011 | SB
-| imm[12|10:5] |     rs2     |     rs1     | 001 |  imm[4:0]   | 0100011 | SH
-| imm[12|10:5] |     rs2     |     rs1     | 010 |  imm[4:0]   | 0100011 | SW
+|  imm[11:5]   |     rs2     |     rs1     | 000 |  imm[4:0]   | 0100011 | SB
+|  imm[11:5]   |     rs2     |     rs1     | 001 |  imm[4:0]   | 0100011 | SH
+|  imm[11:5]   |     rs2     |     rs1     | 010 |  imm[4:0]   | 0100011 | SW
 |         imm[11:0]          |     rs1     | 000 |     rd      | 0010011 | ADDI
 |         imm[11:0]          |     rs1     | 010 |     rd      | 0010011 | SLTI
 |         imm[11:0]          |     rs1     | 011 |     rd      | 0010011 | SLTIU

@@ -18,7 +18,10 @@
 #define RISC_V_SIMULATOR_INCLUDE_REORDER_BUFFER_H
 
 #include "circular_queue.h"
+#include "register.h"
 #include "type.h"
+
+class Bus;
 
 enum class ReorderType {
     registerWrite,
@@ -53,10 +56,15 @@ public:
 
     ~ReorderBuffer() = default;
 
-    void Commit(SizeType index);
+    void TryCommit(Bus& bus);
+
+    ReorderBufferEntry& operator[](SizeType index);
+
+    void Flush();
 
 private:
-    CircularQueue<ReorderBufferEntry, 32> queue_;
+    CircularQueue<ReorderBufferEntry, 32> buffer_;
+    CircularQueue<ReorderBufferEntry, 32> nextBuffer_;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_REORDER_BUFFER_H

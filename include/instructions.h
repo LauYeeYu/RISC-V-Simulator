@@ -17,6 +17,10 @@
 #ifndef RISC_V_SIMULATOR_INCLUDE_INSTRUCTIONS_H
 #define RISC_V_SIMULATOR_INCLUDE_INSTRUCTIONS_H
 
+#include "predictor.h"
+#include "register.h"
+#include "type.h"
+
 enum class Instruction {
     LUI, // Load Upper Immediate
     AUIPC, // Add Upper Immediate
@@ -55,6 +59,43 @@ enum class Instruction {
     SRA, // Shift Right Arithmetic
     OR, // OR
     AND, // AND
+};
+
+struct InstructionInfo {
+    Instruction instruction;
+    SizeType register1;
+    SizeType register2;
+    SizeType destinationRegister;
+    WordType immediate;
+};
+
+class InstructionUnit {
+public:
+    InstructionUnit() = default;
+    InstructionUnit(const InstructionUnit&) = default;
+    InstructionUnit(InstructionUnit&&) = default;
+
+    InstructionUnit& operator=(const InstructionUnit&) = default;
+    InstructionUnit& operator=(InstructionUnit&&) = default;
+
+    ~InstructionUnit() = default;
+
+    /**
+     * Decode the instruction.
+     * @param instruction
+     * @return the instruction info
+     */
+    void FetchAndPush(WordType instruction);
+
+    /**
+     * Set the PC.  Please note that is function is called only when the
+     * prediction is incorrect.
+     * @param pc
+     */
+    void SetPC(WordType pc);
+
+private:
+    Register PC_;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_INSTRUCTIONS_H

@@ -60,3 +60,9 @@ void RegisterFile::ResetDependency() {
         register_.ResetDependency();
     }
 }
+
+void RegisterFile::Flush() {
+    for (SizeType i = 0; i < kRegisterCount; ++i) {
+        registers_[i] = nextRegisters_[i];
+    }
+}

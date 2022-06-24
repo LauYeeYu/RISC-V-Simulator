@@ -73,9 +73,13 @@ public:
 
     void ResetDependency();
 
+    void Flush();
+
 private:
-    Register registers_[32];
-    Register nextRegisters_[32];
+    constexpr static SizeType kRegisterCount = 32;
+
+    Register registers_[kRegisterCount];
+    Register nextRegisters_[kRegisterCount];
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_REGISTER_H

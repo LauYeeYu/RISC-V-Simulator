@@ -17,6 +17,7 @@
 #ifndef RISC_V_SIMULATOR_INCLUDE_INSTRUCTIONS_H
 #define RISC_V_SIMULATOR_INCLUDE_INSTRUCTIONS_H
 
+#include "memory.h"
 #include "predictor.h"
 #include "register.h"
 #include "type.h"
@@ -85,7 +86,7 @@ public:
      * @param instruction
      * @return the instruction info
      */
-    void FetchAndPush(WordType instruction);
+    void FetchAndPush(WordType instruction, Memory& memory);
 
     /**
      * Set the PC.  Please note that is function is called only when the
@@ -95,7 +96,8 @@ public:
     void SetPC(WordType pc);
 
 private:
-    Register PC_;
+    Register  PC_;
+    Predictor predictor_;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_INSTRUCTIONS_H

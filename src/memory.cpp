@@ -78,3 +78,7 @@ void Memory::ResetReadyState() {
 bool Memory::Ready() const {
     return ready_;
 }
+
+WordType Memory::ReadInstruction(SizeType index) const {
+    return *(reinterpret_cast<WordType*>(memory_ + index));
+}

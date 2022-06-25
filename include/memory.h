@@ -28,6 +28,8 @@ public:
     [[nodiscard]] HalfWordType ReadHalfWord(SizeType index) const;
     [[nodiscard]] ByteType ReadByte(SizeType index) const;
 
+    [[nodiscard]] WordType ReadInstruction(SizeType index) const;
+
     void StoreWord(SizeType index, WordType value);
     void StoreHalfWord(SizeType index, HalfWordType value);
     void StoreByte(SizeType index, ByteType value);

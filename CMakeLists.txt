@@ -9,6 +9,7 @@ set(SIMULATOR_INCLUDES
 
 set(SIMULATOR_SOURCES
         src/bus.cpp
+        src/instructions.cpp
         src/main.cpp
         src/memory.cpp
         src/register.cpp

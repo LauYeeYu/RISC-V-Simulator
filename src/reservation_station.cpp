@@ -14,16 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef RISC_V_SIMULATOR_INCLUDE_TYPE_H
-#define RISC_V_SIMULATOR_INCLUDE_TYPE_H
+#include "reservation_station.h"
 
-#include <cstddef>
-#include <cstdint>
-
-using WordType = uint32_t;
-using SignedWordType = int32_t;
-using SizeType = uint32_t;
-using HalfWordType = uint16_t;
-using ByteType = uint8_t;
-
-#endif //RISC_V_SIMULATOR_INCLUDE_TYPE_H
+void ReservationStation::Flush() {
+    for (SizeType i = 0; i < kEntryNumber_; ++i) {
+        entries_[i] = nextEntries_[i];
+    }
+}

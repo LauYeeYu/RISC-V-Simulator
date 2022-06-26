@@ -8,12 +8,14 @@ set(SIMULATOR_INCLUDES
         include)
 
 set(SIMULATOR_SOURCES
+        src/ALU.cpp
         src/bus.cpp
         src/instructions.cpp
         src/main.cpp
         src/memory.cpp
         src/register.cpp
-        src/reorder_buffer.cpp)
+        src/reorder_buffer.cpp
+        src/reservation_station.cpp)
 
 add_executable(code ${SIMULATOR_INCLUDES} ${SIMULATOR_SOURCES})
 target_include_directories(code PRIVATE ${SIMULATOR_INCLUDES})

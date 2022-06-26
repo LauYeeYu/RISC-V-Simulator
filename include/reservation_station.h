@@ -43,10 +43,10 @@ public:
     void Flush();
 
 private:
-    constexpr static SizeType kNumEntries = 8;
+    constexpr static SizeType kEntryNumber_ = 32;
 
-    RSEntry entries[kNumEntries];
-    RSEntry nextEntries[kNumEntries];
+    RSEntry entries_[kEntryNumber_];
+    RSEntry nextEntries_[kEntryNumber_];
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_RESERVATION_STATION_H

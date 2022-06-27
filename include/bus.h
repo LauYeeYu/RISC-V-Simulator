@@ -21,6 +21,7 @@
 #include "memory.h"
 #include "register.h"
 #include "reorder_buffer.h"
+#include "reservation_station.h"
 
 class Bus {
 public:
@@ -36,9 +37,11 @@ public:
     void RegisterCommit(SizeType index, WordType value, SizeType dependency);
 
 private:
-    RegisterFile  registerFile_;
-    ReorderBuffer reorderBuffer_;
-    Memory        memory_;
+    void Flush();
+    Memory             memory_;
+    RegisterFile       registerFile_;
+    ReorderBuffer      reorderBuffer_;
+    ReservationStation reservationStation_;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_BUS_H

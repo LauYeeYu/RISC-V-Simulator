@@ -65,6 +65,8 @@ public:
      */
     T& operator[](SizeType index) { return queue_[index]; }
 
+    const T& operator[](SizeType index) const { return queue_[index]; }
+
     SizeType HeadIndex() const { return head_; }
 
 private:

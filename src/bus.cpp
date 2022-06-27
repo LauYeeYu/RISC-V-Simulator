@@ -28,3 +28,9 @@ Bus::Bus() : registerFile_(), reorderBuffer_(), memory_(204800) {
 void Bus::RegisterCommit(SizeType index, WordType value, SizeType dependency) {
     registerFile_.Write(index, value, dependency);
 }
+
+void Bus::Flush() {
+    registerFile_.Flush();
+    reorderBuffer_.Flush();
+    reservationStation_.Flush();
+}

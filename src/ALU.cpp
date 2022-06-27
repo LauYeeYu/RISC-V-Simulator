@@ -16,6 +16,8 @@
 
 #include "ALU.h"
 
+#include "type.h"
+
 void ALU::Flush() {
     if (busy) {
         busy = false;

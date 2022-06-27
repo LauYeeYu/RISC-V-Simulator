@@ -17,10 +17,17 @@
 #ifndef RISC_V_SIMULATOR_INCLUDE_RESERVATION_STATION_H
 #define RISC_V_SIMULATOR_INCLUDE_RESERVATION_STATION_H
 
+#include "ALU.h"
 #include "instructions.h"
 
+class RegisterFile;
+class ReorderBuffer;
+
 struct RSEntry {
-    bool        busy = false;
+    bool        busy;
+    bool        empty;
+    bool        Q1Constraint;
+    bool        Q2Constraint;
     Instruction instruction;
     WordType    Value1;
     WordType    Value2;
@@ -42,11 +49,26 @@ public:
 
     void Flush();
 
+    void Execute(ReorderBuffer& reorderBuffer);
+
+    bool PushEntry(const RSEntry& entry);
+
 private:
     constexpr static SizeType kEntryNumber_ = 32;
 
+    void FetchResult(ReorderBuffer& reorderBuffer);
+
+    void UpdateBusyState(const ReorderBuffer& reorderBuffer);
+
+    void PushDataIntoALU();
+
     RSEntry entries_[kEntryNumber_];
     RSEntry nextEntries_[kEntryNumber_];
+
+    AddALU   addALU_[2];
+    ShiftALU shiftALU_[2];
+    LogicALU logicALU_[2];
+    SetALU   setALU_[2];
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_RESERVATION_STATION_H

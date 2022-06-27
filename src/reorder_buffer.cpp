@@ -24,6 +24,10 @@ ReorderBufferEntry& ReorderBuffer::operator[](SizeType index) {
     return buffer_[index];
 }
 
+const ReorderBufferEntry& ReorderBuffer::operator[](SizeType index) const {
+    return buffer_[index];
+}
+
 void ReorderBuffer::TryCommit(Bus& bus) {
     if (!nextBuffer_.Front().ready) return;
     switch (nextBuffer_.Front().type) {

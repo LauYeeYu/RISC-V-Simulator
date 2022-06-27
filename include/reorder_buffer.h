@@ -60,6 +60,8 @@ public:
 
     ReorderBufferEntry& operator[](SizeType index);
 
+    const ReorderBufferEntry& operator[](SizeType index) const;
+
     void Flush();
 
 private:

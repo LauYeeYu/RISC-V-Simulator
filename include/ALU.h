@@ -31,14 +31,30 @@ public:
 
     ~ALU() = default;
 
+    /**
+     * Tell whether the ALU is running.
+     */
     [[nodiscard]] bool Busy() const;
 
+    /**
+     * Tell whether the ALU have just finish calculating.
+     * @return
+     */
     [[nodiscard]] bool Finished() const;
 
+    /**
+     * Get the latest result.
+     */
     [[nodiscard]] WordType Result() const;
 
+    /**
+     * Get the index of the latest result.
+     */
     [[nodiscard]] WordType Index() const;
 
+    /**
+     * Update the clock of the ALU.
+     */
     void Flush();
 
 protected:
@@ -61,6 +77,13 @@ public:
 
     ~AddALU() = default;
 
+    /**
+     * Execute the ALU with the given input.
+     * @param input1
+     * @param input2
+     * @param place
+     * @param instruction ADD & ADDI & SUB
+     */
     void Execute(WordType input1,
                  WordType input2,
                  SizeType place,
@@ -78,6 +101,13 @@ public:
 
     ~ShiftALU() = default;
 
+    /**
+     * Execute the ALU with the given input.
+     * @param input1
+     * @param input2
+     * @param place
+     * @param instruction SLL & SLLI & SRL & SRLI & SRA & SRAI
+     */
     void Execute(WordType input1,
                  WordType input2,
                  SizeType place,
@@ -95,6 +125,13 @@ public:
 
     ~SetALU() = default;
 
+    /**
+     * Execute the ALU with the given input.
+     * @param input1
+     * @param input2
+     * @param place
+     * @param instruction SLT & SLTI & SLTU & SLTIU
+     */
     void Execute(WordType input1,
                  WordType input2,
                  SizeType place,
@@ -113,6 +150,13 @@ public:
 
     ~LogicALU() = default;
 
+    /**
+     * Execute the ALU with the given input.
+     * @param input1
+     * @param input2
+     * @param place
+     * @param instruction XOR & XORI & OR & ORI & AND & ANDI
+     */
     void Execute(WordType input1,
                  WordType input2,
                  SizeType place,

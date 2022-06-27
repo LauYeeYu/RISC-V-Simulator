@@ -36,7 +36,7 @@ struct ReorderBufferEntry {
     bool predictedAnswer = false;
     ReorderType type;
     SizeType index;
-    WordType offset; // only for memory write
+    SignedSizeType offset; // only for memory write
     WordType value;
 };
 

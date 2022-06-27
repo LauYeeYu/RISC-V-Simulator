@@ -36,8 +36,18 @@ public:
 
     void RegisterCommit(SizeType index, WordType value, SizeType dependency);
 
+    void SetPC(WordType pc);
+
+    bool TryStoreWordToMemory(SizeType index, SignedSizeType offset, SizeType value);
+
+    bool TryStoreHalfWordToMemory(SizeType index, SignedSizeType offset, SizeType value);
+
+    bool TryStoreByteToMemory(SizeType index, SignedSizeType offset, SizeType value);
+
 private:
     void Flush();
+
+    InstructionUnit    instructionUnit_;
     Memory             memory_;
     RegisterFile       registerFile_;
     ReorderBuffer      reorderBuffer_;

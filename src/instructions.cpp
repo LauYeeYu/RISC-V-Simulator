@@ -274,3 +274,7 @@ void InstructionUnit::FetchAndPush(WordType instruction, Memory& memory) {
     InstructionInfo info = GetInstructionInfo(currentInstruction);
     // TODO
 }
+
+void InstructionUnit::SetPC(WordType pc) {
+    PC_ = pc;
+}

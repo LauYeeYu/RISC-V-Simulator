@@ -34,3 +34,8 @@ void Bus::Flush() {
     reorderBuffer_.Flush();
     reservationStation_.Flush();
 }
+
+void Bus::SetPC(WordType pc) {
+    instructionUnit_.SetPC(pc);
+
+}

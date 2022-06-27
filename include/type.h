@@ -23,6 +23,7 @@
 using WordType = uint32_t;
 using SignedWordType = int32_t;
 using SizeType = uint32_t;
+using SignedSizeType = int32_t;
 using HalfWordType = uint16_t;
 using ByteType = uint8_t;
 

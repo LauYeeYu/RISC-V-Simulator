@@ -29,27 +29,39 @@ const ReorderBufferEntry& ReorderBuffer::operator[](SizeType index) const {
 }
 
 void ReorderBuffer::TryCommit(Bus& bus) {
-    if (!nextBuffer_.Front().ready) return;
-    switch (nextBuffer_.Front().type) {
+    if (!buffer_.Front().ready) return;
+    switch (buffer_.Front().type) {
         case ReorderType::registerWrite:
             // Note that the register can only be updated in the reorder buffer
-            bus.RegisterCommit(nextBuffer_.Front().index,
-                               nextBuffer_.Front().value,
-                               nextBuffer_.HeadIndex());
+            bus.RegisterCommit(buffer_.Front().index,
+                               buffer_.Front().value,
+                               buffer_.HeadIndex());
             break;
         case ReorderType::wordMemoryWrite:
-            //TODO
+            if (!bus.TryStoreWordToMemory(buffer_.Front().index,
+                                          buffer_.Front().offset,
+                                          buffer_.Front().value)) {
+                return;
+            }
             break;
         case ReorderType::halfWordMemoryWrite:
-            //TODO
+            if (!bus.TryStoreHalfWordToMemory(buffer_.Front().index,
+                                              buffer_.Front().offset,
+                                              buffer_.Front().value)) {
+                return;
+            }
             break;
         case ReorderType::byteMemoryWrite:
-            //TODO
+            if (!bus.TryStoreByteToMemory(buffer_.Front().index,
+                                          buffer_.Front().offset,
+                                          buffer_.Front().value)) {
+                return;
+            }
             break;
         case ReorderType::branch:
-            if (nextBuffer_.Front().predictedAnswer != static_cast<bool>(nextBuffer_.Front().value)) {
+            if (buffer_.Front().predictedAnswer != static_cast<bool>(buffer_.Front().value)) {
                 bus.ClearPipeline();
-                //TODO: PC should be updated
+                bus.SetPC(buffer_.Front().index);
             }
             break;
         default:

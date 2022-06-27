@@ -25,7 +25,7 @@ class ReorderBuffer;
 
 struct RSEntry {
     bool        busy;
-    bool        empty;
+    bool        empty = true;
     bool        Q1Constraint;
     bool        Q2Constraint;
     Instruction instruction;

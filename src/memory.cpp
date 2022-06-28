@@ -32,14 +32,26 @@ WordType Memory::ReadWord(SizeType index) const {
     return *(reinterpret_cast<WordType*>(memory_ + index));
 }
 
-HalfWordType Memory::ReadHalfWord(SizeType index) const {
+WordType Memory::ReadHalfWord(SizeType index) const {
     ready_ = false;
-    return *(reinterpret_cast<HalfWordType*>(memory_ + index));
+    return static_cast<WordType>(*(reinterpret_cast<HalfWordType*>(memory_ + index)));
 }
 
-ByteType Memory::ReadByte(SizeType index) const {
+WordType Memory::ReadSignedHalfWord(SizeType index) const {
     ready_ = false;
-    return *(memory_ + index);
+    return static_cast<WordType>(static_cast<SignedWordType>(
+        *(reinterpret_cast<SignedHalfWordType*>(memory_ + index))));
+}
+
+WordType Memory::ReadByte(SizeType index) const {
+    ready_ = false;
+    return static_cast<WordType>(*(memory_ + index));
+}
+
+WordType Memory::ReadSignedByte(SizeType index) const {
+    ready_ = false;
+    return static_cast<WordType>(static_cast<SignedWordType>(*(
+        reinterpret_cast<SignedByteType*>(memory_ + index))));
 }
 
 void Memory::StoreWord(SizeType index, WordType value) {

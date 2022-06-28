@@ -25,8 +25,10 @@ public:
     ~Memory();
 
     [[nodiscard]] WordType ReadWord(SizeType index) const;
-    [[nodiscard]] HalfWordType ReadHalfWord(SizeType index) const;
-    [[nodiscard]] ByteType ReadByte(SizeType index) const;
+    [[nodiscard]] WordType ReadHalfWord(SizeType index) const;
+    [[nodiscard]] WordType ReadSignedHalfWord(SizeType index) const;
+    [[nodiscard]] WordType ReadByte(SizeType index) const;
+    [[nodiscard]] WordType ReadSignedByte(SizeType index) const;
 
     [[nodiscard]] WordType ReadInstruction(SizeType index) const;
 

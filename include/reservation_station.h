@@ -51,7 +51,7 @@ public:
 
     void Execute(ReorderBuffer& reorderBuffer);
 
-    bool PushEntry(const RSEntry& entry);
+    bool Add(const RSEntry& entry);
 
 private:
     constexpr static SizeType kEntryNumber_ = 32;

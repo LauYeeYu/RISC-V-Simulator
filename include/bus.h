@@ -18,6 +18,7 @@
 #define RISC_V_SIMULATOR_INCLUDE_BUS_H
 
 #include "instructions.h"
+#include "load_store_buffer.h"
 #include "memory.h"
 #include "register.h"
 #include "reorder_buffer.h"
@@ -44,14 +45,23 @@ public:
 
     bool TryStoreByteToMemory(SizeType index, SignedSizeType offset, SizeType value);
 
+    [[nodiscard]] const ReorderBuffer& GetReorderBuffer() const;
+
+    [[nodiscard]] Memory& Memory();
+
+    [[nodiscard]] ReorderBuffer& ReorderBuffer();
+
+    [[nodiscard]] LoadStoreBuffer& LoadStoreBuffer();
+
 private:
     void Flush();
 
-    InstructionUnit    instructionUnit_;
-    Memory             memory_;
-    RegisterFile       registerFile_;
-    ReorderBuffer      reorderBuffer_;
-    ReservationStation reservationStation_;
+    class InstructionUnit    instructionUnit_;
+    class Memory             memory_;
+    class RegisterFile       registerFile_;
+    class ReorderBuffer      reorderBuffer_;
+    class ReservationStation reservationStation_;
+    class LoadStoreBuffer    loadStoreBuffer_;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_BUS_H

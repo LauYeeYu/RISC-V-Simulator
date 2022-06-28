@@ -80,6 +80,7 @@ void ReservationStation::PushDataIntoALU() {
                             break;
                         }
                     }
+                    break;
                 case Instruction::SLL:
                 case Instruction::SLLI:
                 case Instruction::SRL:
@@ -92,6 +93,7 @@ void ReservationStation::PushDataIntoALU() {
                             break;
                         }
                     }
+                    break;
                 case Instruction::SLT:
                 case Instruction::SLTI:
                 case Instruction::SLTU:
@@ -102,6 +104,7 @@ void ReservationStation::PushDataIntoALU() {
                             break;
                         }
                     }
+                    break;
                 case Instruction::XOR:
                 case Instruction::XORI:
                 case Instruction::OR:
@@ -114,6 +117,7 @@ void ReservationStation::PushDataIntoALU() {
                             break;
                         }
                     }
+                    break;
                 default:
                     assert(false);
             }
@@ -123,6 +127,7 @@ void ReservationStation::PushDataIntoALU() {
 
 void ReservationStation::UpdateBusyState(const ReorderBuffer& reorderBuffer) {
     for (SizeType i = 0; i < kEntryNumber_; ++i) {
+        if (entries_[i].empty) continue;
         if (entries_[i].Q1Constraint) {
             if (reorderBuffer[entries_[i].Q1].ready) {
                 nextEntries_[i].Q1 = reorderBuffer[entries_[i].Q1].value;
@@ -141,9 +146,9 @@ void ReservationStation::UpdateBusyState(const ReorderBuffer& reorderBuffer) {
     }
 }
 
-bool ReservationStation::PushEntry(const RSEntry& entry) {
+bool ReservationStation::Add(const RSEntry& entry) {
     for (SizeType i = 0; i < kEntryNumber_; ++i) {
-        if (!entries_[i].empty) {
+        if (entries_[i].empty) {
             nextEntries_[i] = entry;
             nextEntries_[i].empty = false;
             return true;

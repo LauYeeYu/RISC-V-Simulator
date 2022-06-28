@@ -15,7 +15,8 @@ set(SIMULATOR_SOURCES
         src/memory.cpp
         src/register.cpp
         src/reorder_buffer.cpp
-        src/reservation_station.cpp)
+        src/reservation_station.cpp
+        src/load_store_buffer.cpp)
 
 add_executable(code ${SIMULATOR_INCLUDES} ${SIMULATOR_SOURCES})
 target_include_directories(code PRIVATE ${SIMULATOR_INCLUDES})

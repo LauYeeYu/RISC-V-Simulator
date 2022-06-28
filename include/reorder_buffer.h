@@ -36,7 +36,6 @@ struct ReorderBufferEntry {
     bool predictedAnswer = false;
     ReorderType type;
     SizeType index;
-    SignedSizeType offset; // only for memory write
     WordType value;
 };
 
@@ -63,6 +62,8 @@ public:
     const ReorderBufferEntry& operator[](SizeType index) const;
 
     void Flush();
+
+    [[nodiscard]] SizeType GetHead() const;
 
 private:
     CircularQueue<ReorderBufferEntry, 32> buffer_;

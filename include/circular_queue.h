@@ -21,7 +21,103 @@
 
 template<class T, int kSize>
 class CircularQueue {
+    friend class Iterator;
+    friend class ConstIterator;
 public:
+    class Iterator {
+        friend class CircularQueue;
+    public:
+        Iterator(const Iterator&) = default;
+        Iterator(Iterator&&) = default;
+        Iterator& operator=(const Iterator&) noexcept = default;
+        Iterator& operator=(Iterator&&) noexcept = default;
+        ~Iterator() = default;
+
+        [[nodiscard]] T& operator*() { return queue_[index_]; }
+        [[nodiscard]] T* operator->() { return &(queue_[index_]); }
+
+        Iterator& operator++() {
+            index_ = (index_ + 1) % kSize;
+            return *this;
+        }
+        Iterator operator++(int) {
+            Iterator tmp(*this);
+            ++*this;
+            return tmp;
+        }
+
+        Iterator& operator--() {
+            index_ = (index_ - 1 + kSize) % kSize;
+            return *this;
+        }
+        Iterator operator--(int) {
+            Iterator tmp(*this);
+            --*this;
+            return tmp;
+        }
+
+        [[nodiscard]] bool operator==(const Iterator& rhs) const {
+            return &(queue_) == &(rhs.queue_) && index_ == rhs.index_;
+        }
+        [[nodiscard]] bool operator!=(const Iterator& rhs) const {
+            return !(*this == rhs);
+        }
+
+    private:
+        Iterator(CircularQueue<T, kSize>& queue, int index)
+            : queue_(queue), index_(index) {}
+
+        CircularQueue<T, kSize>& queue_;
+        SizeType index_ = 0;
+    };
+
+    class ConstIterator {
+        friend class CircularQueue;
+    public:
+        ConstIterator(const ConstIterator&) = default;
+        ConstIterator(ConstIterator&&) = default;
+        ConstIterator& operator=(const ConstIterator&) = default;
+        ConstIterator& operator=(ConstIterator&&) noexcept = default;
+        ~Iterator() = default;
+
+        [[nodiscard]] const T& operator*() const { return queue_[index_]; }
+        [[nodiscard]] const T* operator->() const { return &(queue_[index_]); }
+
+        Iterator& operator++() {
+            index_ = (index_ + 1) % kSize;
+            return *this;
+        }
+        Iterator operator++(int) {
+            Iterator tmp(*this);
+            ++*this;
+            return tmp;
+        }
+
+        Iterator& operator--() {
+            index_ = (index_ - 1 + kSize) % kSize;
+            return *this;
+        }
+        Iterator operator--(int) {
+            Iterator tmp(*this);
+            --*this;
+            return tmp;
+        }
+
+        [[nodiscard]] bool operator==(const Iterator& rhs) const {
+            return &(queue_) == &(rhs.queue_) && index_ == rhs.index_;
+        }
+        [[nodiscard]] bool operator!=(const Iterator& rhs) const {
+            return !(*this == rhs);
+        }
+
+    private:
+        ConstIterator(const CircularQueue<T, kSize>& queue, SizeType index)
+            : queue_(queue), index_(index) {}
+
+        const CircularQueue<T, kSize>& queue_;
+        SizeType index_ = 0;
+    };
+
     CircularQueue() : head_(0), tail_(0) {}
 
     CircularQueue(const CircularQueue&) = default;
@@ -67,7 +163,15 @@ public:
 
     const T& operator[](SizeType index) const { return queue_[index]; }
 
-    SizeType HeadIndex() const { return head_; }
+    [[nodiscard]] SizeType HeadIndex() const { return head_; }
+
+    Iterator Begin() { return Iterator(*this, head_); }
+    Iterator begin() { return Iterator(*this, head_); }
+    Iterator End() { return Iterator(*this, tail_); }
+    Iterator end() { return Iterator(*this, tail_); }
+    ConstIterator Begin() const { return ConstIterator(*this, head_); }
+    ConstIterator End() const { return ConstIterator(*this, tail_); }
+
 
 private:
     T        queue_[kSize];

@@ -38,25 +38,9 @@ void ReorderBuffer::TryCommit(Bus& bus) {
                                buffer_.HeadIndex());
             break;
         case ReorderType::wordMemoryWrite:
-            if (!bus.TryStoreWordToMemory(buffer_.Front().index,
-                                          buffer_.Front().offset,
-                                          buffer_.Front().value)) {
-                return;
-            }
-            break;
         case ReorderType::halfWordMemoryWrite:
-            if (!bus.TryStoreHalfWordToMemory(buffer_.Front().index,
-                                              buffer_.Front().offset,
-                                              buffer_.Front().value)) {
-                return;
-            }
-            break;
         case ReorderType::byteMemoryWrite:
-            if (!bus.TryStoreByteToMemory(buffer_.Front().index,
-                                          buffer_.Front().offset,
-                                          buffer_.Front().value)) {
-                return;
-            }
+            bus.LoadStoreBuffer()[buffer_.Front().index].ready = true;
             break;
         case ReorderType::branch:
             if (buffer_.Front().predictedAnswer != static_cast<bool>(buffer_.Front().value)) {
@@ -72,4 +56,8 @@ void ReorderBuffer::TryCommit(Bus& bus) {
 
 void ReorderBuffer::Flush() {
     buffer_ = nextBuffer_;
+}
+
+SizeType ReorderBuffer::GetHead() const {
+    return buffer_.HeadIndex();
 }

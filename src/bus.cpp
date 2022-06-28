@@ -39,3 +39,19 @@ void Bus::SetPC(WordType pc) {
     instructionUnit_.SetPC(pc);
 
 }
+
+const ReorderBuffer& Bus::GetReorderBuffer() const {
+    return reorderBuffer_;
+}
+
+Memory& Bus::Memory() {
+    return memory_;
+}
+
+ReorderBuffer& Bus::ReorderBuffer() {
+    return reorderBuffer_;
+}
+
+LoadStoreBuffer& Bus::LoadStoreBuffer() {
+    return loadStoreBuffer_;
+}

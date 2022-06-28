@@ -70,11 +70,24 @@ void ShiftALU::Execute(WordType input1, WordType input2, SizeType place, Instruc
 
 void SetALU::Execute(WordType input1, WordType input2, SizeType place, Instruction instruction) {
     busy = true;
-    if (instruction == Instruction::SLT || instruction == Instruction::SLTI) {
+    if (instruction == Instruction::SLT ||
+        instruction == Instruction::SLTI ||
+        instruction == Instruction::BLT) {
         this->nextResult = static_cast<WordType>(
             static_cast<SignedWordType>(input1) < static_cast<SignedWordType>(input2));
-    } else { // SLTU & SLTIU
-        this->nextResult = input1 < input2;
+    } else if (instruction == Instruction::SLTU ||
+               instruction == Instruction::SLTIU ||
+               instruction == Instruction::BLTU) { // SLTU & SLTIU
+        this->nextResult = static_cast<WordType>(input1 < input2);
+    } else if (instruction == Instruction::BEQ) {
+        this->nextResult = static_cast<WordType>(input1 == input2);
+    } else if (instruction == Instruction::BNE) {
+        this->nextResult = static_cast<WordType>(input1 != input2);
+    } else if (instruction == Instruction::BGE) {
+        this->nextResult = static_cast<WordType>(
+            static_cast<SignedWordType>(input1) >= static_cast<SignedWordType>(input2));
+    } else if (instruction == Instruction::BGEU) {
+        this->nextResult = static_cast<WordType>(input1 >= input2);
     }
     this->nextIndex = place;
 }

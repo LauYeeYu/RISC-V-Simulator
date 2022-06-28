@@ -37,7 +37,11 @@ public:
      */
     operator WordType&();
 
+    Register& operator+=(SignedWordType rhs);
+
     [[nodiscard]] bool Dirty() const;
+
+    [[nodiscard]] SizeType Dependency() const;
 
     void SetDependency(SizeType index);
 
@@ -74,6 +78,10 @@ public:
     void ResetDependency();
 
     void Flush();
+
+    [[nodiscard]] bool Dirty(SizeType index) const;
+
+    [[nodiscard]] SizeType Dependency(SizeType index) const;
 
 private:
     constexpr static SizeType kRegisterCount = 32;

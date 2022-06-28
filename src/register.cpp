@@ -42,6 +42,15 @@ void Register::ResetDependency() {
     dirty_ = false;
 }
 
+SizeType Register::Dependency() const {
+    return dependency_;
+}
+
+Register& Register::operator+=(SignedWordType rhs) {
+    value_ += rhs;
+    return *this;
+}
+
 WordType RegisterFile::Read(SizeType index) { return static_cast<WordType>(registers_[index]); }
 
 void RegisterFile::Write(SizeType index, WordType value, SizeType dependency) {
@@ -65,4 +74,12 @@ void RegisterFile::Flush() {
     for (SizeType i = 0; i < kRegisterCount; ++i) {
         registers_[i] = nextRegisters_[i];
     }
+}
+
+bool RegisterFile::Dirty(SizeType index) const {
+    return registers_[index].Dirty();
+}
+
+SizeType RegisterFile::Dependency(SizeType index) const {
+    return registers_[index].Dependency();
 }

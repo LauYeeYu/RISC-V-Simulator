@@ -25,9 +25,7 @@ class Bus;
 
 enum class ReorderType {
     registerWrite,
-    wordMemoryWrite, // write a word to memory
-    halfWordMemoryWrite, // write a half word to memory
-    byteMemoryWrite, // write a byte to memory
+    memoryWrite,
     branch
 };
 
@@ -63,7 +61,11 @@ public:
 
     void Flush();
 
+    [[nodiscard]] bool Full() const;
+
     [[nodiscard]] SizeType GetHead() const;
+
+    SizeType Add(const ReorderBufferEntry& entry, Bus& bus);
 
 private:
     CircularQueue<ReorderBufferEntry, 32> buffer_;

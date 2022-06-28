@@ -22,6 +22,8 @@
 #include "register.h"
 #include "type.h"
 
+class Bus;
+
 enum class Instruction {
     LUI, // Load Upper Immediate
     AUIPC, // Add Upper Immediate
@@ -86,7 +88,7 @@ public:
      * @param instruction
      * @return the instruction info
      */
-    void FetchAndPush(WordType instruction, Memory& memory);
+    void FetchAndPush(WordType instruction, Bus& bus);
 
     /**
      * Set the PC.  Please note that is function is called only when the
@@ -96,8 +98,11 @@ public:
     void SetPC(WordType pc);
 
 private:
-    Register  PC_;
-    Predictor predictor_;
+    bool           stall_ = false;
+    SignedWordType immediate_ = 0; // for JALR
+    SizeType       dependency_ = 0; // for JALR
+    Register       PC_;
+    Predictor      predictor_;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_INSTRUCTIONS_H

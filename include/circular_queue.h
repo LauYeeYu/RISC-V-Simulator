@@ -164,6 +164,7 @@ public:
     const T& operator[](SizeType index) const { return queue_[index]; }
 
     [[nodiscard]] SizeType HeadIndex() const { return head_; }
+    [[nodiscard]] SizeType TailIndex() const { return (tail_ - 1 + kSize) % kSize; }
 
     Iterator Begin() { return Iterator(*this, head_); }
     Iterator begin() { return Iterator(*this, head_); }

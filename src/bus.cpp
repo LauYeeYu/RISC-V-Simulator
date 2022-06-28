@@ -55,3 +55,11 @@ ReorderBuffer& Bus::ReorderBuffer() {
 LoadStoreBuffer& Bus::LoadStoreBuffer() {
     return loadStoreBuffer_;
 }
+
+RegisterFile& Bus::RegisterFile() {
+    return registerFile_;
+}
+
+ReservationStation& Bus::ReservationStation() {
+    return reservationStation_;
+}

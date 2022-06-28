@@ -98,6 +98,12 @@ void ReservationStation::PushDataIntoALU() {
                 case Instruction::SLTI:
                 case Instruction::SLTU:
                 case Instruction::SLTIU:
+                case Instruction::BEQ:
+                case Instruction::BNE:
+                case Instruction::BLT:
+                case Instruction::BGE:
+                case Instruction::BLTU:
+                case Instruction::BGEU:
                     for (auto& alu : setALU_) {
                         if (!alu.Busy()) {
                             alu.Execute(entries_[i].Value1, entries_[i].Value2, i, entries_[i].instruction);

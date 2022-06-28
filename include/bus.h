@@ -53,6 +53,10 @@ public:
 
     [[nodiscard]] LoadStoreBuffer& LoadStoreBuffer();
 
+    [[nodiscard]] RegisterFile& RegisterFile();
+
+    [[nodiscard]] ReservationStation& ReservationStation();
+
 private:
     void Flush();
 

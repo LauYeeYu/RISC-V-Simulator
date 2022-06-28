@@ -24,10 +24,10 @@ class RegisterFile;
 class ReorderBuffer;
 
 struct RSEntry {
-    bool        busy;
+    bool        busy = false;
     bool        empty = true;
-    bool        Q1Constraint;
-    bool        Q2Constraint;
+    bool        Q1Constraint = false;
+    bool        Q2Constraint = false;
     Instruction instruction;
     WordType    Value1;
     WordType    Value2;

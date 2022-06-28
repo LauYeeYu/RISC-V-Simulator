@@ -18,6 +18,9 @@
 
 #include <cassert>
 
+#include "bus.h"
+#include "load_store_buffer.h"
+#include "reorder_buffer.h"
 #include "type.h"
 
 namespace {
@@ -269,10 +272,263 @@ InstructionInfo GetInstructionInfo(WordType instruction) {
 
 } // namespace
 
-void InstructionUnit::FetchAndPush(WordType instruction, Memory& memory) {
-    WordType currentInstruction = memory.ReadInstruction(instruction);
+void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
+    if (stall_) {
+        if (bus.ReorderBuffer()[dependency_].ready) {
+            stall_ = false;
+            PC_ = bus.ReorderBuffer()[dependency_].value + immediate_;
+        }
+    }
+    if (bus.ReorderBuffer().Full()) {
+        return;
+    }
+    WordType currentInstruction = bus.Memory().ReadInstruction(instruction);
     InstructionInfo info = GetInstructionInfo(currentInstruction);
-    // TODO
+    switch (info.instruction) {
+        case Instruction::LUI: { // Load Upper Immediate
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::registerWrite;
+            entry.ready = true;
+            entry.value = info.immediate;
+            entry.index = info.destinationRegister;
+            bus.ReorderBuffer().Add(entry, bus);
+            PC_ += 4;
+            break;
+        }
+        case Instruction::AUIPC: // Add Upper Immediate to PC
+            PC_ += static_cast<SignedWordType>(info.immediate);
+            break;
+        case Instruction::JAL: { // Jump and Link
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::registerWrite;
+            entry.ready = true;
+            entry.value = PC_ + 4;
+            entry.index = info.destinationRegister;
+            bus.ReorderBuffer().Add(entry, bus);
+            PC_ += static_cast<SignedWordType>(info.immediate);
+            break;
+        }
+        case Instruction::JALR: { // Jump and Link Register
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::registerWrite;
+            entry.ready = true;
+            entry.value = PC_ + 4;
+            entry.index = info.destinationRegister;
+            bus.ReorderBuffer().Add(entry, bus);
+            if (bus.RegisterFile().Dirty(info.register1)) {
+                PC_ = (bus.RegisterFile().Read(info.register1) + static_cast<SignedWordType>(info.immediate)) & ~1;
+            } else if (bus.ReorderBuffer()[bus.RegisterFile().Dependency(info.register1)].ready) {
+                PC_ = (bus.ReorderBuffer()[bus.RegisterFile().Dependency(info.register1)].value +
+                       static_cast<SignedWordType>(info.immediate)) & ~1;
+            } else {
+                stall_ = true;
+                immediate_ = static_cast<SignedWordType>(info.immediate);
+                dependency_ = info.register1;
+            }
+            break;
+        }
+        case Instruction::BEQ:
+        case Instruction::BNE:
+        case Instruction::BLT:
+        case Instruction::BGE:
+        case Instruction::BLTU:
+        case Instruction::BGEU: { // Branch if Equal
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::branch;
+            entry.ready = false;
+            RSEntry rsEntry;
+            rsEntry.instruction = info.instruction;
+            if (bus.RegisterFile().Dirty(info.register1)) {
+                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+                if (bus.ReorderBuffer()[rsEntry.Q1].ready) {
+                    rsEntry.Value1 = bus.ReorderBuffer()[rsEntry.Q1].value;
+                } else {
+                    rsEntry.Q1Constraint = true;
+                    rsEntry.busy = true;
+                }
+            } else {
+                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+            }
+            if (bus.RegisterFile().Dirty(info.register2)) {
+                rsEntry.Q2 = bus.RegisterFile().Read(info.register2);
+                if (bus.ReorderBuffer()[rsEntry.Q2].ready) {
+                    rsEntry.Value2 = bus.ReorderBuffer()[rsEntry.Q2].value;
+                } else {
+                    rsEntry.Q2Constraint = true;
+                    rsEntry.busy = true;
+                }
+            } else {
+                rsEntry.Q2 = bus.RegisterFile().Read(info.register2);
+            }
+            if (predictor_.Predict()) {
+                entry.index = PC_ + 4;
+                PC_ += static_cast<SignedWordType>(info.immediate);
+            } else {
+                entry.index = PC_ + static_cast<SignedWordType>(info.immediate);
+                PC_ += 4;
+            }
+            rsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
+            bus.ReservationStation().Add(rsEntry);
+            break;
+        }
+        case Instruction::LB: // Load Byte
+        case Instruction::LH: // Load Halfword
+        case Instruction::LW: // Load Word
+        case Instruction::LBU: // Load Byte Unsigned
+        case Instruction::LHU: { // Load Halfword Unsigned
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::registerWrite;
+            entry.ready = false;
+            LoadStoreEntry lsEntry;
+            lsEntry.type = info.instruction;
+            lsEntry.offset = static_cast<SignedWordType>(info.immediate);
+            lsEntry.ready = true;
+            if (bus.RegisterFile().Dirty(info.register1)) {
+                lsEntry.baseConstraintIndex = bus.RegisterFile().Read(info.register1);
+                if (bus.ReorderBuffer()[lsEntry.baseConstraintIndex].ready) {
+                    lsEntry.base = bus.ReorderBuffer()[lsEntry.baseConstraintIndex].value;
+                } else {
+                    lsEntry.baseConstraint = true;
+                    lsEntry.ready = false;
+                }
+            } else {
+                lsEntry.base = bus.RegisterFile().Read(info.register1);
+            }
+            lsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
+            bus.LoadStoreBuffer().Add(lsEntry);
+            break;
+        }
+        case Instruction::SB: // Store Byte
+        case Instruction::SH: // Store Halfword
+        case Instruction::SW: { // Store Word
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::memoryWrite;
+            entry.ready = false;
+            LoadStoreEntry lsEntry;
+            lsEntry.type = info.instruction;
+            lsEntry.offset = static_cast<SignedWordType>(info.immediate);
+            if (bus.RegisterFile().Dirty(info.register1)) {
+                lsEntry.baseConstraintIndex = bus.RegisterFile().Read(info.register1);
+                if (bus.ReorderBuffer()[lsEntry.baseConstraintIndex].ready) {
+                    lsEntry.base = bus.ReorderBuffer()[lsEntry.baseConstraintIndex].value;
+                } else {
+                    lsEntry.baseConstraint = true;
+                }
+            } else {
+                lsEntry.base = bus.RegisterFile().Read(info.register1);
+            }
+            if (bus.RegisterFile().Dirty(info.destinationRegister)) {
+                lsEntry.valueConstraintIndex = bus.RegisterFile().Read(info.destinationRegister);
+                if (bus.ReorderBuffer()[lsEntry.valueConstraintIndex].ready) {
+                    lsEntry.value = bus.ReorderBuffer()[lsEntry.valueConstraintIndex].value;
+                } else {
+                    lsEntry.valueConstraint = true;
+                }
+            } else {
+                lsEntry.value = bus.RegisterFile().Read(info.register2);
+            }
+            lsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
+            bus.LoadStoreBuffer().Add(lsEntry);
+            break;
+        }
+        case Instruction::ADDI: { // Add Immediate
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::registerWrite;
+            entry.ready = false;
+            entry.index = info.destinationRegister;
+            RSEntry rsEntry;
+            rsEntry.instruction = info.instruction;
+            if (bus.RegisterFile().Dirty(info.register1)) {
+                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+                if (bus.ReorderBuffer()[rsEntry.Q1].ready) {
+                    rsEntry.Value1 = bus.ReorderBuffer()[rsEntry.Q1].value;
+                } else {
+                    rsEntry.Q1Constraint = true;
+                    rsEntry.busy = true;
+                }
+            } else {
+                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+            }
+            rsEntry.Value2 = info.immediate;
+            rsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
+            bus.ReservationStation().Add(rsEntry);
+            break;
+        }
+        case Instruction::SLTI: // Set Less Than Immediate
+        case Instruction::SLTIU: // Set Less Than Immediate Unsigned
+        case Instruction::XORI: // Exclusive OR Immediate
+        case Instruction::ORI: // OR Immediate
+        case Instruction::ANDI:  // AND Immediate
+        case Instruction::SLLI: // Shift Left Logical Immediate
+        case Instruction::SRLI: // Shift Right Logical Immediate
+        case Instruction::SRAI: { // Shift Right Arithmetic Immediate
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::registerWrite;
+            entry.ready = false;
+            entry.index = info.destinationRegister;
+            RSEntry rsEntry;
+            rsEntry.instruction = info.instruction;
+            if (bus.RegisterFile().Dirty(info.register1)) {
+                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+                if (bus.ReorderBuffer()[rsEntry.Q1].ready) {
+                    rsEntry.Value1 = bus.ReorderBuffer()[rsEntry.Q1].value;
+                } else {
+                    rsEntry.Q1Constraint = true;
+                    rsEntry.busy = true;
+                }
+            } else {
+                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+            }
+            rsEntry.Value2 = info.immediate;
+            rsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
+            bus.ReservationStation().Add(rsEntry);
+            break;
+        }
+        case Instruction::ADD: // Add
+        case Instruction::SUB: // Subtract
+        case Instruction::SLL: // Shift Left Logical
+        case Instruction::SLT: // Set Less Than
+        case Instruction::SLTU: // Set Less Than Unsigned
+        case Instruction::XOR: // Exclusive OR
+        case Instruction::SRL: // Shift Right Logical
+        case Instruction::SRA: // Shift Right Arithmetic
+        case Instruction::OR: // OR
+        case Instruction::AND: { // AND
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::registerWrite;
+            entry.ready = false;
+            entry.index = info.destinationRegister;
+            RSEntry rsEntry;
+            rsEntry.instruction = info.instruction;
+            if (bus.RegisterFile().Dirty(info.register1)) {
+                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+                if (bus.ReorderBuffer()[rsEntry.Q1].ready) {
+                    rsEntry.Value1 = bus.ReorderBuffer()[rsEntry.Q1].value;
+                } else {
+                    rsEntry.Q1Constraint = true;
+                    rsEntry.busy = true;
+                }
+            } else {
+                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+            }
+            if (bus.RegisterFile().Dirty(info.register2)) {
+                rsEntry.Q2 = bus.RegisterFile().Read(info.register2);
+                if (bus.ReorderBuffer()[rsEntry.Q2].ready) {
+                    rsEntry.Value2 = bus.ReorderBuffer()[rsEntry.Q2].value;
+                } else {
+                    rsEntry.Q2Constraint = true;
+                    rsEntry.busy = true;
+                }
+            } else {
+                rsEntry.Q2 = bus.RegisterFile().Read(info.register2);
+            }
+            rsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
+            bus.ReservationStation().Add(rsEntry);
+            break;
+        }
+        default:
+            assert(false);
+    }
 }
 
 void InstructionUnit::SetPC(WordType pc) {

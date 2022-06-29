@@ -52,7 +52,7 @@ void LoadStoreBuffer::UpdateBusyState(const ReorderBuffer& reorderBuffer) {
         }
         if (entry.type == Instruction::SW || entry.type == Instruction::SH ||
             entry.type == Instruction::SB) {
-            if (entry.valueConstraint || reorderBuffer[entry.valueConstraintIndex].ready) {
+            if (entry.valueConstraint && reorderBuffer[entry.valueConstraintIndex].ready) {
                 entry.value = reorderBuffer[entry.valueConstraintIndex].value;
                 entry.valueConstraint = true;
             }

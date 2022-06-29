@@ -37,7 +37,7 @@ InstructionUnit::InstructionUnit() : stall_(false),
 
 namespace {
 
-ByteType GetOpCode(WordType instruction) { return instruction & 0b0110111; }
+ByteType GetOpCode(WordType instruction) { return instruction & 0b1111111; }
 
 SizeType GetDestinationRegister(WordType instruction) { return (instruction >>  7) & 0b11111; }
 SizeType GetRegister1          (WordType instruction) { return (instruction >> 15) & 0b11111; }
@@ -291,6 +291,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
                       << std::endl;
             exit(0);
         }
+        return;
     }
     if (stall_) {
         if (bus.GetReorderBuffer()[dependency_].ready) {
@@ -362,11 +363,11 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             }
             break;
         }
-        case Instruction::BEQ:
-        case Instruction::BNE:
-        case Instruction::BLT:
-        case Instruction::BGE:
-        case Instruction::BLTU:
+        case Instruction::BEQ: // Branch on Equal
+        case Instruction::BNE: // Branch on Not Equal
+        case Instruction::BLT: // Branch on Less Than
+        case Instruction::BGE: // Branch on Greater Than or Equal
+        case Instruction::BLTU: // Branch on Less Than Unsigned
         case Instruction::BGEU: { // Branch if Equal
             ReorderBufferEntry entry;
             entry.type = ReorderType::branch;
@@ -374,7 +375,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             RSEntry rsEntry;
             rsEntry.instruction = info.instruction;
             if (bus.GetRegisterFile().Dirty(info.register1)) {
-                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                rsEntry.Q1 = bus.GetRegisterFile().Dependency(info.register1);
                 if (bus.GetReorderBuffer()[rsEntry.Q1].ready) {
                     rsEntry.Value1 = bus.GetReorderBuffer()[rsEntry.Q1].value;
                 } else {
@@ -382,10 +383,10 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                rsEntry.Value1 = bus.GetRegisterFile().Read(info.register1);
             }
             if (bus.GetRegisterFile().Dirty(info.register2)) {
-                rsEntry.Q2 = bus.GetRegisterFile().Read(info.register2);
+                rsEntry.Q2 = bus.GetRegisterFile().Dependency(info.register2);
                 if (bus.GetReorderBuffer()[rsEntry.Q2].ready) {
                     rsEntry.Value2 = bus.GetReorderBuffer()[rsEntry.Q2].value;
                 } else {
@@ -393,7 +394,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q2 = bus.GetRegisterFile().Read(info.register2);
+                rsEntry.Value2 = bus.GetRegisterFile().Read(info.register2);
             }
             if (predictor_.Predict()) {
                 entry.index = PC_ + 4;
@@ -414,12 +415,13 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             ReorderBufferEntry entry;
             entry.type = ReorderType::registerWrite;
             entry.ready = false;
+            entry.index = info.destinationRegister;
             LoadStoreEntry lsEntry;
             lsEntry.type = info.instruction;
             lsEntry.offset = static_cast<SignedWordType>(info.immediate);
             lsEntry.ready = true;
             if (bus.GetRegisterFile().Dirty(info.register1)) {
-                lsEntry.baseConstraintIndex = bus.GetRegisterFile().Read(info.register1);
+                lsEntry.baseConstraintIndex = bus.GetRegisterFile().Dependency(info.register1);
                 if (bus.GetReorderBuffer()[lsEntry.baseConstraintIndex].ready) {
                     lsEntry.base = bus.GetReorderBuffer()[lsEntry.baseConstraintIndex].value;
                 } else {
@@ -431,6 +433,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             }
             lsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
             bus.GetLoadStoreBuffer().Add(lsEntry);
+            PC_ += 4;
             break;
         }
         case Instruction::SB: // Store Byte
@@ -443,7 +446,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             lsEntry.type = info.instruction;
             lsEntry.offset = static_cast<SignedWordType>(info.immediate);
             if (bus.GetRegisterFile().Dirty(info.register1)) {
-                lsEntry.baseConstraintIndex = bus.GetRegisterFile().Read(info.register1);
+                lsEntry.baseConstraintIndex = bus.GetRegisterFile().Dependency(info.register1);
                 if (bus.GetReorderBuffer()[lsEntry.baseConstraintIndex].ready) {
                     lsEntry.base = bus.GetReorderBuffer()[lsEntry.baseConstraintIndex].value;
                 } else {
@@ -452,8 +455,8 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             } else {
                 lsEntry.base = bus.GetRegisterFile().Read(info.register1);
             }
-            if (bus.GetRegisterFile().Dirty(info.destinationRegister)) {
-                lsEntry.valueConstraintIndex = bus.GetRegisterFile().Read(info.destinationRegister);
+            if (bus.GetRegisterFile().Dirty(info.register2)) {
+                lsEntry.valueConstraintIndex = bus.GetRegisterFile().Dependency(info.register2);
                 if (bus.GetReorderBuffer()[lsEntry.valueConstraintIndex].ready) {
                     lsEntry.value = bus.GetReorderBuffer()[lsEntry.valueConstraintIndex].value;
                 } else {
@@ -464,6 +467,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             }
             lsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
             bus.GetLoadStoreBuffer().Add(lsEntry);
+            PC_ += 4;
             break;
         }
         case Instruction::ADDI: { // Add Immediate
@@ -474,7 +478,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             RSEntry rsEntry;
             rsEntry.instruction = info.instruction;
             if (bus.GetRegisterFile().Dirty(info.register1)) {
-                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                rsEntry.Q1 = bus.GetRegisterFile().Dependency(info.register1);
                 if (bus.GetReorderBuffer()[rsEntry.Q1].ready) {
                     rsEntry.Value1 = bus.GetReorderBuffer()[rsEntry.Q1].value;
                 } else {
@@ -482,11 +486,12 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                rsEntry.Value1 = bus.GetRegisterFile().Read(info.register1);
             }
             rsEntry.Value2 = info.immediate;
             rsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
             bus.GetReservationStation().Add(rsEntry);
+            PC_ += 4;
             break;
         }
         case Instruction::SLTI: // Set Less Than Immediate
@@ -504,7 +509,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             RSEntry rsEntry;
             rsEntry.instruction = info.instruction;
             if (bus.GetRegisterFile().Dirty(info.register1)) {
-                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                rsEntry.Q1 = bus.GetRegisterFile().Dependency(info.register1);
                 if (bus.GetReorderBuffer()[rsEntry.Q1].ready) {
                     rsEntry.Value1 = bus.GetReorderBuffer()[rsEntry.Q1].value;
                 } else {
@@ -512,11 +517,12 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                rsEntry.Value1 = bus.GetRegisterFile().Read(info.register1);
             }
             rsEntry.Value2 = info.immediate;
             rsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
             bus.GetReservationStation().Add(rsEntry);
+            PC_ += 4;
             break;
         }
         case Instruction::ADD: // Add
@@ -536,7 +542,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             RSEntry rsEntry;
             rsEntry.instruction = info.instruction;
             if (bus.GetRegisterFile().Dirty(info.register1)) {
-                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                rsEntry.Q1 = bus.GetRegisterFile().Dependency(info.register1);
                 if (bus.GetReorderBuffer()[rsEntry.Q1].ready) {
                     rsEntry.Value1 = bus.GetReorderBuffer()[rsEntry.Q1].value;
                 } else {
@@ -544,10 +550,10 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                rsEntry.Value1 = bus.GetRegisterFile().Read(info.register1);
             }
             if (bus.GetRegisterFile().Dirty(info.register2)) {
-                rsEntry.Q2 = bus.GetRegisterFile().Read(info.register2);
+                rsEntry.Q2 = bus.GetRegisterFile().Dependency(info.register2);
                 if (bus.GetReorderBuffer()[rsEntry.Q2].ready) {
                     rsEntry.Value2 = bus.GetReorderBuffer()[rsEntry.Q2].value;
                 } else {
@@ -555,10 +561,11 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q2 = bus.GetRegisterFile().Read(info.register2);
+                rsEntry.Value2 = bus.GetRegisterFile().Read(info.register2);
             }
             rsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
             bus.GetReservationStation().Add(rsEntry);
+            PC_ += 4;
             break;
         }
         default:

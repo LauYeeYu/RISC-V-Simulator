@@ -66,7 +66,9 @@ bool ReorderBuffer::Full() const {
 
 SizeType ReorderBuffer::Add(const ReorderBufferEntry& entry, Bus& bus) {
     nextBuffer_.Push(entry);
-    bus.GetRegisterFile().AboutToWrite(entry.index, nextBuffer_.TailIndex());
+    if (entry.type == ReorderType::registerWrite) {
+        bus.GetRegisterFile().AboutToWrite(entry.index, nextBuffer_.TailIndex());
+    }
     return nextBuffer_.TailIndex();
 }
 

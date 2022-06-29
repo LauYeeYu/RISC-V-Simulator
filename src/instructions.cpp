@@ -465,6 +465,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             } else {
                 lsEntry.value = bus.GetRegisterFile().Read(info.register2);
             }
+            entry.index = bus.GetLoadStoreBuffer().GetEndIndex();
             lsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
             bus.GetLoadStoreBuffer().Add(lsEntry);
             PC_ += 4;

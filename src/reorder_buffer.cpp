@@ -21,7 +21,7 @@
 #include "bus.h"
 
 ReorderBufferEntry& ReorderBuffer::operator[](SizeType index) {
-    return buffer_[index];
+    return nextBuffer_[index];
 }
 
 const ReorderBufferEntry& ReorderBuffer::operator[](SizeType index) const {
@@ -29,6 +29,7 @@ const ReorderBufferEntry& ReorderBuffer::operator[](SizeType index) const {
 }
 
 void ReorderBuffer::TryCommit(Bus& bus) {
+    if (buffer_.Empty()) return;
     if (!buffer_.Front().ready) return;
     switch (buffer_.Front().type) {
         case ReorderType::registerWrite:
@@ -74,4 +75,12 @@ SizeType ReorderBuffer::Add(const ReorderBufferEntry& entry, Bus& bus) {
 
 void ReorderBuffer::Clear() {
     nextBuffer_.Clear();
+}
+
+const ReorderBufferEntry& ReorderBuffer::GetEntry(SizeType index) const {
+    return buffer_[index];
+}
+
+ReorderBufferEntry& ReorderBuffer::WriteEntry(SizeType index) {
+    return nextBuffer_[index];
 }

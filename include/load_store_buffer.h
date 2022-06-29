@@ -57,8 +57,10 @@ public:
 
     void ClearOnWrongPrediction();
 
+    [[nodiscard]] SizeType GetEndIndex() const;
+
 private:
-    void UpdateBusyState(const ReorderBuffer& reorderBuffer);
+    void UpdateBusyState(ReorderBuffer& reorderBuffer);
 
     void MemoryIO(Bus& bus);
 

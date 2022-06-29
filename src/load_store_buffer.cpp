@@ -36,27 +36,31 @@ void LoadStoreBuffer::Execute(Bus& bus) {
     if (count_ > 0) {
         --count_;
         if (count_ == 0) {
-            MemoryIO(bus);
+            this->MemoryIO(bus);
+            buffer_.Pop();
         }
-    } else if (buffer_.Empty() && buffer_.Front().ready) {
+    } else if (buffer_.Front().ready) {
         count_ = 2;
     }
     this->UpdateBusyState(bus.GetReorderBuffer());
 }
 
-void LoadStoreBuffer::UpdateBusyState(const ReorderBuffer& reorderBuffer) {
+void LoadStoreBuffer::UpdateBusyState(ReorderBuffer& reorderBuffer) {
     for (auto& entry : buffer_) {
-        if (entry.baseConstraint || reorderBuffer[entry.baseConstraintIndex].ready) {
-            entry.base = reorderBuffer[entry.baseConstraintIndex].value;
-            entry.baseConstraint = true;
+        if (entry.baseConstraint && reorderBuffer.GetEntry(entry.baseConstraintIndex).ready) {
+            entry.base = reorderBuffer.GetEntry(entry.baseConstraintIndex).value;
+            entry.baseConstraint = false;
         }
         if (entry.type == Instruction::SW || entry.type == Instruction::SH ||
             entry.type == Instruction::SB) {
-            if (entry.valueConstraint && reorderBuffer[entry.valueConstraintIndex].ready) {
-                entry.value = reorderBuffer[entry.valueConstraintIndex].value;
-                entry.valueConstraint = true;
+            if (entry.valueConstraint && reorderBuffer.GetEntry(entry.valueConstraintIndex).ready) {
+                entry.value = reorderBuffer.GetEntry(entry.valueConstraintIndex).value;
+                entry.valueConstraint = false;
             }
-        } else {
+            if (!entry.baseConstraint && !entry.valueConstraint) {
+                    reorderBuffer.WriteEntry(entry.RoBIndex).ready = true;
+            }
+        } else { // Load
             if (!entry.baseConstraint && !entry.valueConstraint) {
                 entry.ready = true;
             }
@@ -124,5 +128,9 @@ void LoadStoreBuffer::ClearOnWrongPrediction() {
         break;
     }
 
+}
+
+SizeType LoadStoreBuffer::GetEndIndex() const {
+    return (buffer_.TailIndex() + 1) % buffer_.MaxSize();
 }
 

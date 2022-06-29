@@ -59,6 +59,10 @@ public:
 
     const ReorderBufferEntry& operator[](SizeType index) const;
 
+    [[nodiscard]] const ReorderBufferEntry& GetEntry(SizeType index) const;
+
+    ReorderBufferEntry& WriteEntry(SizeType index);
+
     void Flush();
 
     [[nodiscard]] bool Full() const;

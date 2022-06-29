@@ -38,7 +38,7 @@ void LoadStoreBuffer::Execute(Bus& bus) {
         if (count_ == 0) {
             MemoryIO(bus);
         }
-    } else if (buffer_.Front().ready) {
+    } else if (buffer_.Empty() && buffer_.Front().ready) {
         count_ = 2;
     }
     this->UpdateBusyState(bus.GetReorderBuffer());

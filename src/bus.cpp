@@ -78,7 +78,6 @@ void Bus::Run() {
         reorderBuffer_.TryCommit(*this);
         ++clock_;
         Flush();
-
     }
 
 }

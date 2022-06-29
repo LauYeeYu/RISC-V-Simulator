@@ -69,7 +69,7 @@ void ReservationStation::FetchResult(ReorderBuffer& reorderBuffer) {
 
 void ReservationStation::PushDataIntoALU() {
     for (SizeType i = 0; i < kEntryNumber_; ++i) {
-        if (!entries_[i].busy) {
+        if (!entries_[i].empty && !entries_[i].busy) {
             switch (entries_[i].instruction) {
                 case Instruction::ADD:
                 case Instruction::SUB:

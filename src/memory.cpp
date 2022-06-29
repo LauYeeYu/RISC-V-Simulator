@@ -21,6 +21,7 @@
 
 Memory::Memory(SizeType size) {
     memory_ = new ByteType[size];
+    Init();
 }
 
 Memory::~Memory() {
@@ -71,7 +72,7 @@ void Memory::StoreByte(SizeType index, ByteType value) {
 
 void Memory::Init() {
     std::string token;
-    ByteType address = 0;
+    WordType address = 0;
 while (std::cin >> token) {
         if (token[0] == '@') {
             std::string address_str = token.substr(1);

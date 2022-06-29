@@ -74,7 +74,7 @@ struct InstructionInfo {
 
 class InstructionUnit {
 public:
-    InstructionUnit() = default;
+    InstructionUnit();
     InstructionUnit(const InstructionUnit&) = default;
     InstructionUnit(InstructionUnit&&) = default;
 

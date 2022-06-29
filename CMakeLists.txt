@@ -13,6 +13,7 @@ set(SIMULATOR_SOURCES
         src/instructions.cpp
         src/main.cpp
         src/memory.cpp
+        src/predictor.cpp
         src/register.cpp
         src/reorder_buffer.cpp
         src/reservation_station.cpp

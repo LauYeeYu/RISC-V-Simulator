@@ -25,6 +25,16 @@
 #include "reorder_buffer.h"
 #include "type.h"
 
+InstructionUnit::InstructionUnit() : stall_(false),
+                                     end_(false),
+                                     endDependency_(0),
+                                     immediate_(0),
+                                     dependency_(0),
+                                     PC_(),
+                                     predictor_() {
+    PC_ = 0;
+}
+
 namespace {
 
 ByteType GetOpCode(WordType instruction) { return instruction & 0b0110111; }

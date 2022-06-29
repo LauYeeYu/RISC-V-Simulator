@@ -274,35 +274,35 @@ InstructionInfo GetInstructionInfo(WordType instruction) {
 
 } // namespace
 
-void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
+void InstructionUnit::FetchAndPush(Bus& bus) {
     if (end_) {
-        if (bus.ReorderBuffer()[endDependency_].ready) {
-            std::cout << (static_cast<HalfWordType>(bus.ReorderBuffer()[endDependency_].value) & 255u)
+        if (bus.GetReorderBuffer()[endDependency_].ready) {
+            std::cout << (static_cast<HalfWordType>(bus.GetReorderBuffer()[endDependency_].value) & 255u)
                       << std::endl;
             exit(0);
         }
     }
     if (stall_) {
-        if (bus.ReorderBuffer()[dependency_].ready) {
+        if (bus.GetReorderBuffer()[dependency_].ready) {
             stall_ = false;
-            PC_ = bus.ReorderBuffer()[dependency_].value + immediate_;
+            PC_ = bus.GetReorderBuffer()[dependency_].value + immediate_;
         }
     }
-    if (bus.ReorderBuffer().Full()) {
+    if (bus.GetReorderBuffer().Full()) {
         return;
     }
-    WordType currentInstruction = bus.Memory().ReadInstruction(instruction);
+    WordType currentInstruction = bus.GetMemory().ReadInstruction(PC_);
     if (currentInstruction == 0x0ff00513) {
         end_ = true;
-        if (bus.RegisterFile().Dirty(10)) {
-            endDependency_ = bus.RegisterFile().Dependency(10);
-            if (bus.ReorderBuffer()[endDependency_].ready) {
-                std::cout << (static_cast<HalfWordType>(bus.ReorderBuffer()[endDependency_].value) & 255u)
+        if (bus.GetRegisterFile().Dirty(10)) {
+            endDependency_ = bus.GetRegisterFile().Dependency(10);
+            if (bus.GetReorderBuffer()[endDependency_].ready) {
+                std::cout << (static_cast<HalfWordType>(bus.GetReorderBuffer()[endDependency_].value) & 255u)
                           << std::endl;
                 exit(0);
             }
         } else {
-            std::cout << (static_cast<HalfWordType>(bus.RegisterFile().Read(10)) & 255u)
+            std::cout << (static_cast<HalfWordType>(bus.GetRegisterFile().Read(10)) & 255u)
                       << std::endl;
             exit(0);
         }
@@ -316,7 +316,7 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             entry.ready = true;
             entry.value = info.immediate;
             entry.index = info.destinationRegister;
-            bus.ReorderBuffer().Add(entry, bus);
+            bus.GetReorderBuffer().Add(entry, bus);
             PC_ += 4;
             break;
         }
@@ -329,7 +329,7 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             entry.ready = true;
             entry.value = PC_ + 4;
             entry.index = info.destinationRegister;
-            bus.ReorderBuffer().Add(entry, bus);
+            bus.GetReorderBuffer().Add(entry, bus);
             PC_ += static_cast<SignedWordType>(info.immediate);
             break;
         }
@@ -339,11 +339,11 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             entry.ready = true;
             entry.value = PC_ + 4;
             entry.index = info.destinationRegister;
-            bus.ReorderBuffer().Add(entry, bus);
-            if (bus.RegisterFile().Dirty(info.register1)) {
-                PC_ = (bus.RegisterFile().Read(info.register1) + static_cast<SignedWordType>(info.immediate)) & ~1;
-            } else if (bus.ReorderBuffer()[bus.RegisterFile().Dependency(info.register1)].ready) {
-                PC_ = (bus.ReorderBuffer()[bus.RegisterFile().Dependency(info.register1)].value +
+            bus.GetReorderBuffer().Add(entry, bus);
+            if (bus.GetRegisterFile().Dirty(info.register1)) {
+                PC_ = (bus.GetRegisterFile().Read(info.register1) + static_cast<SignedWordType>(info.immediate)) & ~1;
+            } else if (bus.GetReorderBuffer()[bus.GetRegisterFile().Dependency(info.register1)].ready) {
+                PC_ = (bus.GetReorderBuffer()[bus.GetRegisterFile().Dependency(info.register1)].value +
                        static_cast<SignedWordType>(info.immediate)) & ~1;
             } else {
                 stall_ = true;
@@ -363,27 +363,27 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             entry.ready = false;
             RSEntry rsEntry;
             rsEntry.instruction = info.instruction;
-            if (bus.RegisterFile().Dirty(info.register1)) {
-                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
-                if (bus.ReorderBuffer()[rsEntry.Q1].ready) {
-                    rsEntry.Value1 = bus.ReorderBuffer()[rsEntry.Q1].value;
+            if (bus.GetRegisterFile().Dirty(info.register1)) {
+                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                if (bus.GetReorderBuffer()[rsEntry.Q1].ready) {
+                    rsEntry.Value1 = bus.GetReorderBuffer()[rsEntry.Q1].value;
                 } else {
                     rsEntry.Q1Constraint = true;
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
             }
-            if (bus.RegisterFile().Dirty(info.register2)) {
-                rsEntry.Q2 = bus.RegisterFile().Read(info.register2);
-                if (bus.ReorderBuffer()[rsEntry.Q2].ready) {
-                    rsEntry.Value2 = bus.ReorderBuffer()[rsEntry.Q2].value;
+            if (bus.GetRegisterFile().Dirty(info.register2)) {
+                rsEntry.Q2 = bus.GetRegisterFile().Read(info.register2);
+                if (bus.GetReorderBuffer()[rsEntry.Q2].ready) {
+                    rsEntry.Value2 = bus.GetReorderBuffer()[rsEntry.Q2].value;
                 } else {
                     rsEntry.Q2Constraint = true;
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q2 = bus.RegisterFile().Read(info.register2);
+                rsEntry.Q2 = bus.GetRegisterFile().Read(info.register2);
             }
             if (predictor_.Predict()) {
                 entry.index = PC_ + 4;
@@ -392,8 +392,8 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
                 entry.index = PC_ + static_cast<SignedWordType>(info.immediate);
                 PC_ += 4;
             }
-            rsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
-            bus.ReservationStation().Add(rsEntry);
+            rsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
+            bus.GetReservationStation().Add(rsEntry);
             break;
         }
         case Instruction::LB: // Load Byte
@@ -408,19 +408,19 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             lsEntry.type = info.instruction;
             lsEntry.offset = static_cast<SignedWordType>(info.immediate);
             lsEntry.ready = true;
-            if (bus.RegisterFile().Dirty(info.register1)) {
-                lsEntry.baseConstraintIndex = bus.RegisterFile().Read(info.register1);
-                if (bus.ReorderBuffer()[lsEntry.baseConstraintIndex].ready) {
-                    lsEntry.base = bus.ReorderBuffer()[lsEntry.baseConstraintIndex].value;
+            if (bus.GetRegisterFile().Dirty(info.register1)) {
+                lsEntry.baseConstraintIndex = bus.GetRegisterFile().Read(info.register1);
+                if (bus.GetReorderBuffer()[lsEntry.baseConstraintIndex].ready) {
+                    lsEntry.base = bus.GetReorderBuffer()[lsEntry.baseConstraintIndex].value;
                 } else {
                     lsEntry.baseConstraint = true;
                     lsEntry.ready = false;
                 }
             } else {
-                lsEntry.base = bus.RegisterFile().Read(info.register1);
+                lsEntry.base = bus.GetRegisterFile().Read(info.register1);
             }
-            lsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
-            bus.LoadStoreBuffer().Add(lsEntry);
+            lsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
+            bus.GetLoadStoreBuffer().Add(lsEntry);
             break;
         }
         case Instruction::SB: // Store Byte
@@ -432,28 +432,28 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             LoadStoreEntry lsEntry;
             lsEntry.type = info.instruction;
             lsEntry.offset = static_cast<SignedWordType>(info.immediate);
-            if (bus.RegisterFile().Dirty(info.register1)) {
-                lsEntry.baseConstraintIndex = bus.RegisterFile().Read(info.register1);
-                if (bus.ReorderBuffer()[lsEntry.baseConstraintIndex].ready) {
-                    lsEntry.base = bus.ReorderBuffer()[lsEntry.baseConstraintIndex].value;
+            if (bus.GetRegisterFile().Dirty(info.register1)) {
+                lsEntry.baseConstraintIndex = bus.GetRegisterFile().Read(info.register1);
+                if (bus.GetReorderBuffer()[lsEntry.baseConstraintIndex].ready) {
+                    lsEntry.base = bus.GetReorderBuffer()[lsEntry.baseConstraintIndex].value;
                 } else {
                     lsEntry.baseConstraint = true;
                 }
             } else {
-                lsEntry.base = bus.RegisterFile().Read(info.register1);
+                lsEntry.base = bus.GetRegisterFile().Read(info.register1);
             }
-            if (bus.RegisterFile().Dirty(info.destinationRegister)) {
-                lsEntry.valueConstraintIndex = bus.RegisterFile().Read(info.destinationRegister);
-                if (bus.ReorderBuffer()[lsEntry.valueConstraintIndex].ready) {
-                    lsEntry.value = bus.ReorderBuffer()[lsEntry.valueConstraintIndex].value;
+            if (bus.GetRegisterFile().Dirty(info.destinationRegister)) {
+                lsEntry.valueConstraintIndex = bus.GetRegisterFile().Read(info.destinationRegister);
+                if (bus.GetReorderBuffer()[lsEntry.valueConstraintIndex].ready) {
+                    lsEntry.value = bus.GetReorderBuffer()[lsEntry.valueConstraintIndex].value;
                 } else {
                     lsEntry.valueConstraint = true;
                 }
             } else {
-                lsEntry.value = bus.RegisterFile().Read(info.register2);
+                lsEntry.value = bus.GetRegisterFile().Read(info.register2);
             }
-            lsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
-            bus.LoadStoreBuffer().Add(lsEntry);
+            lsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
+            bus.GetLoadStoreBuffer().Add(lsEntry);
             break;
         }
         case Instruction::ADDI: { // Add Immediate
@@ -463,20 +463,20 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             entry.index = info.destinationRegister;
             RSEntry rsEntry;
             rsEntry.instruction = info.instruction;
-            if (bus.RegisterFile().Dirty(info.register1)) {
-                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
-                if (bus.ReorderBuffer()[rsEntry.Q1].ready) {
-                    rsEntry.Value1 = bus.ReorderBuffer()[rsEntry.Q1].value;
+            if (bus.GetRegisterFile().Dirty(info.register1)) {
+                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                if (bus.GetReorderBuffer()[rsEntry.Q1].ready) {
+                    rsEntry.Value1 = bus.GetReorderBuffer()[rsEntry.Q1].value;
                 } else {
                     rsEntry.Q1Constraint = true;
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
             }
             rsEntry.Value2 = info.immediate;
-            rsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
-            bus.ReservationStation().Add(rsEntry);
+            rsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
+            bus.GetReservationStation().Add(rsEntry);
             break;
         }
         case Instruction::SLTI: // Set Less Than Immediate
@@ -493,20 +493,20 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             entry.index = info.destinationRegister;
             RSEntry rsEntry;
             rsEntry.instruction = info.instruction;
-            if (bus.RegisterFile().Dirty(info.register1)) {
-                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
-                if (bus.ReorderBuffer()[rsEntry.Q1].ready) {
-                    rsEntry.Value1 = bus.ReorderBuffer()[rsEntry.Q1].value;
+            if (bus.GetRegisterFile().Dirty(info.register1)) {
+                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                if (bus.GetReorderBuffer()[rsEntry.Q1].ready) {
+                    rsEntry.Value1 = bus.GetReorderBuffer()[rsEntry.Q1].value;
                 } else {
                     rsEntry.Q1Constraint = true;
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
             }
             rsEntry.Value2 = info.immediate;
-            rsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
-            bus.ReservationStation().Add(rsEntry);
+            rsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
+            bus.GetReservationStation().Add(rsEntry);
             break;
         }
         case Instruction::ADD: // Add
@@ -525,30 +525,30 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
             entry.index = info.destinationRegister;
             RSEntry rsEntry;
             rsEntry.instruction = info.instruction;
-            if (bus.RegisterFile().Dirty(info.register1)) {
-                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
-                if (bus.ReorderBuffer()[rsEntry.Q1].ready) {
-                    rsEntry.Value1 = bus.ReorderBuffer()[rsEntry.Q1].value;
+            if (bus.GetRegisterFile().Dirty(info.register1)) {
+                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
+                if (bus.GetReorderBuffer()[rsEntry.Q1].ready) {
+                    rsEntry.Value1 = bus.GetReorderBuffer()[rsEntry.Q1].value;
                 } else {
                     rsEntry.Q1Constraint = true;
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q1 = bus.RegisterFile().Read(info.register1);
+                rsEntry.Q1 = bus.GetRegisterFile().Read(info.register1);
             }
-            if (bus.RegisterFile().Dirty(info.register2)) {
-                rsEntry.Q2 = bus.RegisterFile().Read(info.register2);
-                if (bus.ReorderBuffer()[rsEntry.Q2].ready) {
-                    rsEntry.Value2 = bus.ReorderBuffer()[rsEntry.Q2].value;
+            if (bus.GetRegisterFile().Dirty(info.register2)) {
+                rsEntry.Q2 = bus.GetRegisterFile().Read(info.register2);
+                if (bus.GetReorderBuffer()[rsEntry.Q2].ready) {
+                    rsEntry.Value2 = bus.GetReorderBuffer()[rsEntry.Q2].value;
                 } else {
                     rsEntry.Q2Constraint = true;
                     rsEntry.busy = true;
                 }
             } else {
-                rsEntry.Q2 = bus.RegisterFile().Read(info.register2);
+                rsEntry.Q2 = bus.GetRegisterFile().Read(info.register2);
             }
-            rsEntry.RoBIndex = bus.ReorderBuffer().Add(entry, bus);
-            bus.ReservationStation().Add(rsEntry);
+            rsEntry.RoBIndex = bus.GetReorderBuffer().Add(entry, bus);
+            bus.GetReservationStation().Add(rsEntry);
             break;
         }
         default:

@@ -41,7 +41,7 @@ void LoadStoreBuffer::Execute(Bus& bus) {
     } else if (buffer_.Front().ready) {
         count_ = 2;
     }
-    this->UpdateBusyState(bus.ReorderBuffer());
+    this->UpdateBusyState(bus.GetReorderBuffer());
 }
 
 void LoadStoreBuffer::UpdateBusyState(const ReorderBuffer& reorderBuffer) {
@@ -71,44 +71,58 @@ LoadStoreEntry& LoadStoreBuffer::operator[](SizeType index) {
 void LoadStoreBuffer::MemoryIO(Bus& bus) {
     switch (buffer_.Front().type) {
         case Instruction::LW:
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].value =
-                bus.Memory().ReadWord(buffer_.Front().base + buffer_.Front().offset);
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].value =
+                bus.GetMemory().ReadWord(buffer_.Front().base + buffer_.Front().offset);
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
             break;
         case Instruction::LH:
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].value =
-                bus.Memory().ReadSignedHalfWord(buffer_.Front().base + buffer_.Front().offset);
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].value =
+                bus.GetMemory().ReadSignedHalfWord(buffer_.Front().base + buffer_.Front().offset);
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
             break;
         case Instruction::LHU:
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].value =
-                bus.Memory().ReadHalfWord(buffer_.Front().base + buffer_.Front().offset);
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].value =
+                bus.GetMemory().ReadHalfWord(buffer_.Front().base + buffer_.Front().offset);
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
             break;
         case Instruction::LB:
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].value =
-                bus.Memory().ReadSignedByte(buffer_.Front().base + buffer_.Front().offset);
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].value =
+                bus.GetMemory().ReadSignedByte(buffer_.Front().base + buffer_.Front().offset);
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
             break;
         case Instruction::LBU:
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].value =
-                bus.Memory().ReadByte(buffer_.Front().base + buffer_.Front().offset);
-            bus.ReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].value =
+                bus.GetMemory().ReadByte(buffer_.Front().base + buffer_.Front().offset);
+            bus.GetReorderBuffer()[buffer_.Front().RoBIndex].ready = true;
             break;
         case Instruction::SW:
-            bus.Memory().StoreWord(buffer_.Front().base + buffer_.Front().offset,
-                                   static_cast<WordType>(buffer_.Front().value));
+            bus.GetMemory().StoreWord(buffer_.Front().base + buffer_.Front().offset,
+                                      static_cast<WordType>(buffer_.Front().value));
             break;
         case Instruction::SH:
-            bus.Memory().StoreHalfWord(buffer_.Front().base + buffer_.Front().offset,
-                                       static_cast<HalfWordType>(buffer_.Front().value));
+            bus.GetMemory().StoreHalfWord(buffer_.Front().base + buffer_.Front().offset,
+                                          static_cast<HalfWordType>(buffer_.Front().value));
             break;
         case Instruction::SB:
-            bus.Memory().StoreByte(buffer_.Front().base + buffer_.Front().offset,
-                                   static_cast<ByteType>(buffer_.Front().value));
+            bus.GetMemory().StoreByte(buffer_.Front().base + buffer_.Front().offset,
+                                      static_cast<ByteType>(buffer_.Front().value));
             break;
         default:
             assert(false);
     }
+}
+
+void LoadStoreBuffer::ClearOnWrongPrediction() {
+    SizeType tail = (buffer_.TailIndex() + 1) % buffer_.MaxSize();
+    for (SizeType i = buffer_.HeadIndex(); i != tail; i = (i + 1) % buffer_.MaxSize()) {
+        if ((buffer_[i].type == Instruction::SB ||
+             buffer_[i].type == Instruction::SH ||
+             buffer_[i].type == Instruction::SW) && buffer_[i].ready) {
+            continue;
+        }
+        buffer_.SetAsEnd(i);
+        break;
+    }
+
 }
 

@@ -21,9 +21,12 @@
 #include "register.h"
 #include "reorder_buffer.h"
 
-Bus::Bus() : registerFile_(), reorderBuffer_(), memory_(204800) {
-    memory_.Init();
-}
+Bus::Bus() : memory_(2048000),
+             instructionUnit_(),
+             registerFile_(),
+             reorderBuffer_(),
+             reservationStation_(),
+             loadStoreBuffer_() {};
 
 void Bus::RegisterCommit(SizeType index, WordType value, SizeType dependency) {
     registerFile_.Write(index, value, dependency);
@@ -40,26 +43,42 @@ void Bus::SetPC(WordType pc) {
 
 }
 
-const ReorderBuffer& Bus::GetReorderBuffer() const {
-    return reorderBuffer_;
-}
-
-Memory& Bus::Memory() {
+Memory& Bus::GetMemory() {
     return memory_;
 }
 
-ReorderBuffer& Bus::ReorderBuffer() {
+ReorderBuffer& Bus::GetReorderBuffer() {
     return reorderBuffer_;
 }
 
-LoadStoreBuffer& Bus::LoadStoreBuffer() {
+LoadStoreBuffer& Bus::GetLoadStoreBuffer() {
     return loadStoreBuffer_;
 }
 
-RegisterFile& Bus::RegisterFile() {
+RegisterFile& Bus::GetRegisterFile() {
     return registerFile_;
 }
 
-ReservationStation& Bus::ReservationStation() {
+ReservationStation& Bus::GetReservationStation() {
     return reservationStation_;
+}
+
+void Bus::ClearPipeline() {
+    registerFile_.ResetDependency();
+    reorderBuffer_.Clear();
+    reservationStation_.Clear();
+    loadStoreBuffer_.ClearOnWrongPrediction();
+}
+
+void Bus::Run() {
+    while (true) {
+        loadStoreBuffer_.Execute(*this);
+        instructionUnit_.FetchAndPush(*this);
+        reservationStation_.Execute(reorderBuffer_);
+        reorderBuffer_.TryCommit(*this);
+        ++clock_;
+        Flush();
+
+    }
+
 }

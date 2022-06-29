@@ -53,6 +53,8 @@ public:
 
     bool Add(const RSEntry& entry);
 
+    void Clear();
+
 private:
     constexpr static SizeType kEntryNumber_ = 32;
 

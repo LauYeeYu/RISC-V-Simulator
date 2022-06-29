@@ -67,6 +67,8 @@ public:
 
     SizeType Add(const ReorderBufferEntry& entry, Bus& bus);
 
+    void Clear();
+
 private:
     CircularQueue<ReorderBufferEntry, 32> buffer_;
     CircularQueue<ReorderBufferEntry, 32> nextBuffer_;

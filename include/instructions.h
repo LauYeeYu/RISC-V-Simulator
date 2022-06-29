@@ -85,10 +85,10 @@ public:
 
     /**
      * Decode the instruction.
-     * @param instruction
+     * @param bus
      * @return the instruction info
      */
-    void FetchAndPush(WordType instruction, Bus& bus);
+    void FetchAndPush(Bus& bus);
 
     /**
      * Set the PC.  Please note that is function is called only when the

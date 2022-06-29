@@ -38,7 +38,7 @@ void ReorderBuffer::TryCommit(Bus& bus) {
                                buffer_.HeadIndex());
             break;
         case ReorderType::memoryWrite:
-            bus.LoadStoreBuffer()[buffer_.Front().index].ready = true;
+            bus.GetLoadStoreBuffer()[buffer_.Front().index].ready = true;
             break;
         case ReorderType::branch:
             if (buffer_.Front().predictedAnswer != static_cast<bool>(buffer_.Front().value)) {
@@ -66,6 +66,10 @@ bool ReorderBuffer::Full() const {
 
 SizeType ReorderBuffer::Add(const ReorderBufferEntry& entry, Bus& bus) {
     nextBuffer_.Push(entry);
-    bus.RegisterFile().AboutToWrite(entry.index, nextBuffer_.TailIndex());
+    bus.GetRegisterFile().AboutToWrite(entry.index, nextBuffer_.TailIndex());
     return nextBuffer_.TailIndex();
+}
+
+void ReorderBuffer::Clear() {
+    nextBuffer_.Clear();
 }

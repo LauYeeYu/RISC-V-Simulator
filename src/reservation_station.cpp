@@ -162,3 +162,11 @@ bool ReservationStation::Add(const RSEntry& entry) {
     }
     return false;
 }
+
+void ReservationStation::Clear() {
+    for (auto& i : nextEntries_) i.empty = true;
+    for (auto& alu : addALU_) alu.Clear();
+    for (auto& alu : shiftALU_) alu.Clear();
+    for (auto& alu : setALU_) alu.Clear();
+    for (auto& alu : logicALU_) alu.Clear();
+}

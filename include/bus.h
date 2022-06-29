@@ -39,26 +39,22 @@ public:
 
     void SetPC(WordType pc);
 
-    bool TryStoreWordToMemory(SizeType index, SignedSizeType offset, SizeType value);
+    void Run();
 
-    bool TryStoreHalfWordToMemory(SizeType index, SignedSizeType offset, SizeType value);
+    [[nodiscard]] Memory& GetMemory();
 
-    bool TryStoreByteToMemory(SizeType index, SignedSizeType offset, SizeType value);
+    [[nodiscard]] ReorderBuffer& GetReorderBuffer();
 
-    [[nodiscard]] const ReorderBuffer& GetReorderBuffer() const;
+    [[nodiscard]] LoadStoreBuffer& GetLoadStoreBuffer();
 
-    [[nodiscard]] Memory& Memory();
+    [[nodiscard]] RegisterFile& GetRegisterFile();
 
-    [[nodiscard]] ReorderBuffer& ReorderBuffer();
-
-    [[nodiscard]] LoadStoreBuffer& LoadStoreBuffer();
-
-    [[nodiscard]] RegisterFile& RegisterFile();
-
-    [[nodiscard]] ReservationStation& ReservationStation();
+    [[nodiscard]] ReservationStation& GetReservationStation();
 
 private:
     void Flush();
+
+    long  clock_ = 0;
 
     class InstructionUnit    instructionUnit_;
     class Memory             memory_;

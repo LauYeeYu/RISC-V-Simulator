@@ -78,7 +78,7 @@ public:
         ConstIterator(ConstIterator&&) = default;
         ConstIterator& operator=(const ConstIterator&) = default;
         ConstIterator& operator=(ConstIterator&&) noexcept = default;
-        ~Iterator() = default;
+        ~ConstIterator() = default;
 
         [[nodiscard]] const T& operator*() const { return queue_[index_]; }
         [[nodiscard]] const T* operator->() const { return &(queue_[index_]); }
@@ -153,6 +153,11 @@ public:
         head_ = (head_ + 1) % kSize;
     }
 
+    void Clear() {
+        head_ = 0;
+        tail_ = 0;
+    }
+
     T& Front() { return queue_[head_]; }
 
     /**
@@ -165,6 +170,7 @@ public:
 
     [[nodiscard]] SizeType HeadIndex() const { return head_; }
     [[nodiscard]] SizeType TailIndex() const { return (tail_ - 1 + kSize) % kSize; }
+    [[nodiscard]] constexpr SizeType MaxSize() const { return kSize; }
 
     Iterator Begin() { return Iterator(*this, head_); }
     Iterator begin() { return Iterator(*this, head_); }
@@ -173,6 +179,7 @@ public:
     ConstIterator Begin() const { return ConstIterator(*this, head_); }
     ConstIterator End() const { return ConstIterator(*this, tail_); }
 
+    void SetAsEnd(SizeType index) { tail_ = index; }
 
 private:
     T        queue_[kSize];

@@ -52,6 +52,8 @@ public:
      */
     [[nodiscard]] WordType Index() const;
 
+    void Clear();
+
     /**
      * Update the clock of the ALU.
      */

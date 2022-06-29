@@ -30,7 +30,7 @@ public:
 
     ~Predictor() = default;
 
-    [[nodiscard]] bool Predict(/*TODO*/) const;
+    [[nodiscard]] bool Predict(/*TODO*/);
 
     [[nodiscard]] float GetAccuracy() const;
 

@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#include "memory.h"
+#include "bus.h"
 
 int main() {
-    Memory memory(2048000);
-    memory.Init();
-    return 0;
+    Bus bus;
+    bus.Run();
+    return 0;;
 }

@@ -46,6 +46,10 @@ bool ALU::Finished() const {
     return finished;
 }
 
+void ALU::Clear() {
+    busy = false;
+}
+
 void AddALU::Execute(WordType input1, WordType input2, SizeType place, Instruction instruction) {
     busy = true;
     if (instruction == Instruction::SUB) {

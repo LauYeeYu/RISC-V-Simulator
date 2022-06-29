@@ -55,6 +55,8 @@ public:
 
     LoadStoreEntry& operator[](SizeType index);
 
+    void ClearOnWrongPrediction();
+
 private:
     void UpdateBusyState(const ReorderBuffer& reorderBuffer);
 

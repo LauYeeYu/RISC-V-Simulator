@@ -99,6 +99,8 @@ public:
 
 private:
     bool           stall_ = false;
+    bool           end_ = false;
+    SizeType       endDependency_ = 0;
     SignedWordType immediate_ = 0; // for JALR
     SizeType       dependency_ = 0; // for JALR
     Register       PC_;

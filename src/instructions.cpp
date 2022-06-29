@@ -17,6 +17,8 @@
 #include "instructions.h"
 
 #include <cassert>
+#include <cstdlib>
+#include <iostream>
 
 #include "bus.h"
 #include "load_store_buffer.h"
@@ -273,6 +275,13 @@ InstructionInfo GetInstructionInfo(WordType instruction) {
 } // namespace
 
 void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
+    if (end_) {
+        if (bus.ReorderBuffer()[endDependency_].ready) {
+            std::cout << (static_cast<HalfWordType>(bus.ReorderBuffer()[endDependency_].value) & 255u)
+                      << std::endl;
+            exit(0);
+        }
+    }
     if (stall_) {
         if (bus.ReorderBuffer()[dependency_].ready) {
             stall_ = false;
@@ -283,6 +292,22 @@ void InstructionUnit::FetchAndPush(WordType instruction, Bus& bus) {
         return;
     }
     WordType currentInstruction = bus.Memory().ReadInstruction(instruction);
+    if (currentInstruction == 0x0ff00513) {
+        end_ = true;
+        if (bus.RegisterFile().Dirty(10)) {
+            endDependency_ = bus.RegisterFile().Dependency(10);
+            if (bus.ReorderBuffer()[endDependency_].ready) {
+                std::cout << (static_cast<HalfWordType>(bus.ReorderBuffer()[endDependency_].value) & 255u)
+                          << std::endl;
+                exit(0);
+            }
+        } else {
+            std::cout << (static_cast<HalfWordType>(bus.RegisterFile().Read(10)) & 255u)
+                      << std::endl;
+            exit(0);
+        }
+        return;
+    }
     InstructionInfo info = GetInstructionInfo(currentInstruction);
     switch (info.instruction) {
         case Instruction::LUI: { // Load Upper Immediate

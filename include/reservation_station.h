@@ -28,6 +28,7 @@ struct RSEntry {
     bool        empty = true;
     bool        Q1Constraint = false;
     bool        Q2Constraint = false;
+    bool        executing = false;
     Instruction instruction;
     WordType    Value1;
     WordType    Value2;

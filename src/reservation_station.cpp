@@ -69,7 +69,7 @@ void ReservationStation::FetchResult(ReorderBuffer& reorderBuffer) {
 
 void ReservationStation::PushDataIntoALU() {
     for (SizeType i = 0; i < kEntryNumber_; ++i) {
-        if (!entries_[i].empty && !entries_[i].busy) {
+        if (!entries_[i].empty && !entries_[i].busy && !entries_[i].executing) {
             switch (entries_[i].instruction) {
                 case Instruction::ADD:
                 case Instruction::SUB:
@@ -77,6 +77,7 @@ void ReservationStation::PushDataIntoALU() {
                     for (auto& alu : addALU_) {
                         if (!alu.Busy()) {
                             alu.Execute(entries_[i].Value1, entries_[i].Value2, i, entries_[i].instruction);
+                            nextEntries_[i].executing = true;
                             break;
                         }
                     }
@@ -90,6 +91,7 @@ void ReservationStation::PushDataIntoALU() {
                     for (auto& alu : shiftALU_) {
                         if (!alu.Busy()) {
                             alu.Execute(entries_[i].Value1, entries_[i].Value2, i, entries_[i].instruction);
+                            nextEntries_[i].executing = true;
                             break;
                         }
                     }
@@ -107,6 +109,7 @@ void ReservationStation::PushDataIntoALU() {
                     for (auto& alu : setALU_) {
                         if (!alu.Busy()) {
                             alu.Execute(entries_[i].Value1, entries_[i].Value2, i, entries_[i].instruction);
+                            nextEntries_[i].executing = true;
                             break;
                         }
                     }
@@ -120,6 +123,7 @@ void ReservationStation::PushDataIntoALU() {
                     for (auto& alu : logicALU_) {
                         if (!alu.Busy()) {
                             alu.Execute(entries_[i].Value1, entries_[i].Value2, i, entries_[i].instruction);
+                            nextEntries_[i].executing = true;
                             break;
                         }
                     }

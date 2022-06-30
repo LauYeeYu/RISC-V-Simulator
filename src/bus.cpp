@@ -81,3 +81,7 @@ void Bus::Run() {
     }
 
 }
+
+long Bus::Clock() const {
+    return clock_;
+}

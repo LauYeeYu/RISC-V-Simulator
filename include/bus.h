@@ -41,6 +41,8 @@ public:
 
     void Run();
 
+    [[nodiscard]] long Clock() const;
+
     [[nodiscard]] Memory& GetMemory();
 
     [[nodiscard]] ReorderBuffer& GetReorderBuffer();

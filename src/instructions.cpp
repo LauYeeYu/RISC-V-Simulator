@@ -289,6 +289,9 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
         if (bus.GetReorderBuffer()[endDependency_].ready) {
             std::cout << (static_cast<HalfWordType>(bus.GetReorderBuffer()[endDependency_].value) & 255u)
                       << std::endl;
+#ifdef LAU_TEST
+            std::cerr << "Terminated at "<< bus.Clock() << std::endl;
+#endif
             exit(0);
         }
         return;

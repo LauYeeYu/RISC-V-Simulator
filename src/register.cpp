@@ -16,6 +16,10 @@
 
 #include "register.h"
 
+#ifdef LAU_SHOW_REGISTER_DETAILS
+#include <iostream>
+#endif
+
 Register::operator WordType&() {
     return value_;
 }
@@ -55,12 +59,16 @@ WordType RegisterFile::Read(SizeType index) { return static_cast<WordType>(regis
 
 void RegisterFile::Write(SizeType index, WordType value, SizeType dependency) {
     if (index != 0) {
+#ifdef LAU_SHOW_REGISTER_DETAILS
+        std::cerr << "Register " << index << " <- " << value << std::endl;
+#endif
         nextRegisters_[index] = value;
         nextRegisters_[index].TryResetWithIndex(dependency);
     }
 }
 
 void RegisterFile::AboutToWrite(SizeType index, SizeType dependency) {
+    if (index == 0) return;
     nextRegisters_[index].SetDependency(dependency);
 }
 

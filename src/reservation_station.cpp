@@ -136,13 +136,13 @@ void ReservationStation::UpdateBusyState(const ReorderBuffer& reorderBuffer) {
         if (entries_[i].empty) continue;
         if (entries_[i].Q1Constraint) {
             if (reorderBuffer[entries_[i].Q1].ready) {
-                nextEntries_[i].Q1 = reorderBuffer[entries_[i].Q1].value;
+                nextEntries_[i].Value1 = reorderBuffer[entries_[i].Q1].value;
                 nextEntries_[i].Q1Constraint = false;
             }
         }
         if (entries_[i].Q2Constraint) {
             if (reorderBuffer[entries_[i].Q2].ready) {
-                nextEntries_[i].Q2 = reorderBuffer[entries_[i].Q2].value;
+                nextEntries_[i].Value2 = reorderBuffer[entries_[i].Q2].value;
                 nextEntries_[i].Q2Constraint = false;
             }
         }

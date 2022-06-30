@@ -17,6 +17,7 @@
 #include "reorder_buffer.h"
 
 #include <cassert>
+#include <iostream>
 
 #include "bus.h"
 
@@ -47,6 +48,13 @@ void ReorderBuffer::TryCommit(Bus& bus) {
                 bus.SetPC(buffer_.Front().index);
             }
             break;
+        case ReorderType::end:
+            std::cout << (static_cast<HalfWordType>(bus.GetRegisterFile().Read(10)) & 255u)
+                      << std::endl;
+#ifdef LAU_TEST
+            std::cerr << "Terminated at " << bus.Clock() << std::endl;
+#endif
+            exit(0);
         default:
             assert(false); // should never happen
     }

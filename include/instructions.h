@@ -62,6 +62,7 @@ enum class Instruction {
     SRA, // Shift Right Arithmetic
     OR, // OR
     AND, // AND
+    END // End of Main 0x0ff00513
 };
 
 struct InstructionInfo {

@@ -285,17 +285,6 @@ InstructionInfo GetInstructionInfo(WordType instruction) {
 } // namespace
 
 void InstructionUnit::FetchAndPush(Bus& bus) {
-    if (end_) {
-        if (bus.GetReorderBuffer()[endDependency_].ready) {
-            std::cout << (static_cast<HalfWordType>(bus.GetReorderBuffer()[endDependency_].value) & 255u)
-                      << std::endl;
-#ifdef LAU_TEST
-            std::cerr << "Terminated at "<< bus.Clock() << std::endl;
-#endif
-            exit(0);
-        }
-        return;
-    }
     if (stall_) {
         if (bus.GetReorderBuffer()[dependency_].ready) {
             stall_ = false;
@@ -307,19 +296,10 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
     }
     WordType currentInstruction = bus.GetMemory().ReadInstruction(PC_);
     if (currentInstruction == 0x0ff00513) {
-        end_ = true;
-        if (bus.GetRegisterFile().Dirty(10)) {
-            endDependency_ = bus.GetRegisterFile().Dependency(10);
-            if (bus.GetReorderBuffer()[endDependency_].ready) {
-                std::cout << (static_cast<HalfWordType>(bus.GetReorderBuffer()[endDependency_].value) & 255u)
-                          << std::endl;
-                exit(0);
-            }
-        } else {
-            std::cout << (static_cast<HalfWordType>(bus.GetRegisterFile().Read(10)) & 255u)
-                      << std::endl;
-            exit(0);
-        }
+        ReorderBufferEntry entry;
+        entry.ready = true;
+        entry.type = ReorderType::end;
+        bus.GetReorderBuffer().Add(entry, bus);
         return;
     }
     InstructionInfo info = GetInstructionInfo(currentInstruction);
@@ -354,11 +334,11 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             entry.value = PC_ + 4;
             entry.index = info.destinationRegister;
             bus.GetReorderBuffer().Add(entry, bus);
-            if (bus.GetRegisterFile().Dirty(info.register1)) {
-                PC_ = (bus.GetRegisterFile().Read(info.register1) + static_cast<SignedWordType>(info.immediate)) & ~1;
+            if (!bus.GetRegisterFile().Dirty(info.register1)) {
+                PC_ = ((bus.GetRegisterFile().Read(info.register1) + static_cast<SignedWordType>(info.immediate))) & ~1;
             } else if (bus.GetReorderBuffer()[bus.GetRegisterFile().Dependency(info.register1)].ready) {
-                PC_ = (bus.GetReorderBuffer()[bus.GetRegisterFile().Dependency(info.register1)].value +
-                       static_cast<SignedWordType>(info.immediate)) & ~1;
+                PC_ = ((bus.GetReorderBuffer()[bus.GetRegisterFile().Dependency(info.register1)].value +
+                        static_cast<SignedWordType>(info.immediate))) & ~1;
             } else {
                 stall_ = true;
                 immediate_ = static_cast<SignedWordType>(info.immediate);

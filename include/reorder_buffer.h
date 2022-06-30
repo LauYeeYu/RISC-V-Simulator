@@ -26,7 +26,8 @@ class Bus;
 enum class ReorderType {
     registerWrite,
     memoryWrite,
-    branch
+    branch,
+    end
 };
 
 struct ReorderBufferEntry {

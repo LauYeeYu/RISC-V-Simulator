@@ -63,6 +63,7 @@ WordType GetJALImmediate(WordType instruction) {
     immediate |= (instruction >> 9) & 0x800; // 11
     immediate |= (instruction >> 20) & 0b11111111110; // 10:1
     immediate |= (instruction >> 11) & 0x100000; // 20
+    return (immediate & 0x100000) ? (immediate | 0xFFF00000) : immediate;
     return SignedExtend(immediate);
 }
 
@@ -83,7 +84,7 @@ WordType GetStoreImmediate(WordType instruction) {
 }
 
 /// 24:20 shift amount
-WordType GetShiftAmount(WordType instruction) { return (instruction >> 7) & 0b11111; }
+WordType GetShiftAmount(WordType instruction) { return (instruction >> 20) & 0b11111; }
 
 /// 14:12
 WordType GetFunction3(WordType instruction) { return (instruction >> 12) & 0b111; }
@@ -259,7 +260,8 @@ InstructionInfo GetInstructionInfo(WordType instruction) {
             break;
         case 0b0010011: // ADDI & SLTI & SLTIU & XORI & ORI & ANDI & SLLI & SRLI & SRAI
             info.instruction = GetImmediateInstruction(instruction);
-            if (info.instruction == Instruction::SRLI ||
+            if (info.instruction == Instruction::SLLI ||
+                info.instruction == Instruction::SRLI ||
                 info.instruction == Instruction::SRAI) {
                 info.immediate = GetShiftAmount(instruction);
             } else if (info.instruction == Instruction::SLTIU) {
@@ -342,7 +344,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             } else {
                 stall_ = true;
                 immediate_ = static_cast<SignedWordType>(info.immediate);
-                dependency_ = info.register1;
+                dependency_ = bus.GetRegisterFile().Dependency(info.register1);
             }
             break;
         }

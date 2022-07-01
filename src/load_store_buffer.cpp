@@ -58,8 +58,9 @@ void LoadStoreBuffer::UpdateBusyState(ReorderBuffer& reorderBuffer) {
                 entry.value = reorderBuffer.GetEntry(entry.valueConstraintIndex).value;
                 entry.valueConstraint = false;
             }
-            if (!entry.baseConstraint && !entry.valueConstraint) {
-                    reorderBuffer.WriteEntry(entry.RoBIndex).ready = true;
+            if (!entry.ready && !entry.baseConstraint && !entry.valueConstraint) {
+                // entry.ready is used to avoid the case that the entry will be updated again.
+                reorderBuffer.WriteEntry(entry.RoBIndex).ready = true;
             }
         } else { // Load
             if (!entry.baseConstraint && !entry.valueConstraint) {
@@ -142,4 +143,3 @@ void LoadStoreBuffer::ClearOnWrongPrediction() {
 SizeType LoadStoreBuffer::GetEndIndex() const {
     return (buffer_.TailIndex() + 1) % buffer_.MaxSize();
 }
-

@@ -17,5 +17,6 @@
 #include "predictor.h"
 
 bool Predictor::Predict() {
-    return false;
+    predict = ~predict;
+    return predict;
 }

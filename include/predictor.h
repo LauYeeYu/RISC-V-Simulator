@@ -39,6 +39,7 @@ public:
 private:
     SizeType predictCount = 0;
     SizeType predictWrong = 0;
+    bool predict = false;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_PREDICTOR_H

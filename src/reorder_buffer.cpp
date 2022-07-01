@@ -46,6 +46,7 @@ void ReorderBuffer::TryCommit(Bus& bus) {
             if (buffer_.Front().predictedAnswer != static_cast<bool>(buffer_.Front().value)) {
                 bus.ClearPipeline();
                 bus.SetPC(buffer_.Front().index);
+                return; // skip the pop
             }
             break;
         case ReorderType::end:

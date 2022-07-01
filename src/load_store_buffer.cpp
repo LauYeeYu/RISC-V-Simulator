@@ -40,7 +40,7 @@ void LoadStoreBuffer::Execute(Bus& bus) {
             this->MemoryIO(bus);
             buffer_.Pop();
         }
-    } else if (buffer_.Front().ready) {
+    } else if (!buffer_.Empty() && buffer_.Front().ready) {
         count_ = 2;
     }
     this->UpdateBusyState(bus.GetReorderBuffer());
@@ -132,6 +132,9 @@ void LoadStoreBuffer::ClearOnWrongPrediction() {
         }
         buffer_.SetAsEnd(i);
         break;
+    }
+    if (buffer_.Empty()) {
+        count_ = 0;
     }
 
 }

@@ -128,7 +128,7 @@ public:
 
     ~CircularQueue() = default;
 
-    [[nodiscard]] bool Full() const { return (tail_ + 1) % kSize == head_; }
+    [[nodiscard]] bool Full() const { return (tail_ + 2) % kSize == head_; }
 
     [[nodiscard]] bool Empty() const { return tail_ == head_; }
 

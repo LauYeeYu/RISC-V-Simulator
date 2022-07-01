@@ -293,7 +293,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             PC_ = bus.GetReorderBuffer()[dependency_].value + immediate_;
         }
     }
-    if (bus.GetReorderBuffer().Full()) {
+    if (bus.GetReorderBuffer().Full() || bus.GetLoadStoreBuffer().Full()) {
         return;
     }
     WordType currentInstruction = bus.GetMemory().ReadInstruction(PC_);

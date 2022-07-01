@@ -17,6 +17,7 @@
 #include "load_store_buffer.h"
 
 #include <cassert>
+#include <iostream>
 
 #include "bus.h"
 #include "instructions.h"
@@ -102,6 +103,11 @@ void LoadStoreBuffer::MemoryIO(Bus& bus) {
         case Instruction::SW:
             bus.GetMemory().StoreWord(buffer_.Front().base + buffer_.Front().offset,
                                       static_cast<WordType>(buffer_.Front().value));
+#ifdef LAU_SHOW_ALL_DETAILS
+            std::cerr << "Store Word: memory at "
+                      << buffer_.Front().base + buffer_.Front().offset << " "
+                      << buffer_.Front().value << std::endl;
+#endif
             break;
         case Instruction::SH:
             bus.GetMemory().StoreHalfWord(buffer_.Front().base + buffer_.Front().offset,

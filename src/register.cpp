@@ -60,7 +60,7 @@ WordType RegisterFile::Read(SizeType index) { return static_cast<WordType>(regis
 void RegisterFile::Write(SizeType index, WordType value, SizeType dependency) {
     if (index != 0) {
 #ifdef LAU_SHOW_REGISTER_DETAILS
-        std::cerr << "Register " << index << " <- " << value << std::endl;
+        std::cerr << "Register " << index << "\t<- " << value << std::endl;
 #endif
         nextRegisters_[index] = value;
         nextRegisters_[index].TryResetWithIndex(dependency);

@@ -40,7 +40,6 @@ void Bus::Flush() {
 
 void Bus::SetPC(WordType pc) {
     instructionUnit_.SetPC(pc);
-
 }
 
 Memory& Bus::GetMemory() {
@@ -68,6 +67,7 @@ void Bus::ClearPipeline() {
     reorderBuffer_.Clear();
     reservationStation_.Clear();
     loadStoreBuffer_.ClearOnWrongPrediction();
+    instructionUnit_.ResetStateOnClearPipeline();
 }
 
 void Bus::Run() {

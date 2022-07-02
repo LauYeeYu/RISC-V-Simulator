@@ -64,7 +64,6 @@ WordType GetJALImmediate(WordType instruction) {
     immediate |= (instruction >> 20) & 0b11111111110; // 10:1
     immediate |= (instruction >> 11) & 0x100000; // 20
     return (immediate & 0x100000) ? (immediate | 0xFFF00000) : immediate;
-    return SignedExtend(immediate);
 }
 
 /// 31:25 imm[12|10:5] 11:7 imm[4:1|11]
@@ -72,8 +71,8 @@ WordType GetBranchImmediate(WordType instruction) {
     WordType immediate = (instruction >> 7) & 0b11110; // 4:1
     immediate |= (instruction << 4) & 0x800; // 11
     immediate |= (instruction >> 20) & 0x7E0; // 10:5
-    immediate |= (instruction >> 19) & 0x800; // 12
-    return SignedExtend(immediate);
+    immediate |= (instruction >> 19) & 0x1000; // 12
+    return (immediate & 0x1000) ? (immediate | 0xFFFFF000) : immediate;
 }
 
 /// 31:25 imm[11:5] 11:7 imm[4:0]
@@ -167,10 +166,10 @@ Instruction GetImmediateInstruction(WordType instruction) {
                 default:
                     assert(false);
             }
-        case 0b110: // SRAI
-            return Instruction::SRAI;
-        case 0b111: // ORI
+        case 0b110: // ORI
             return Instruction::ORI;
+        case 0b111: // ANDI
+            return Instruction::ANDI;
         default:
             assert(false);
     }
@@ -292,6 +291,7 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             stall_ = false;
             PC_ = bus.GetReorderBuffer()[dependency_].value + immediate_;
         }
+        return;
     }
     if (bus.GetReorderBuffer().Full() || bus.GetLoadStoreBuffer().Full()) {
         return;
@@ -563,3 +563,5 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
 void InstructionUnit::SetPC(WordType pc) {
     PC_ = pc;
 }
+
+void InstructionUnit::ResetStateOnClearPipeline() { stall_ = false; }

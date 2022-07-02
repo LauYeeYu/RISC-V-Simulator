@@ -98,6 +98,8 @@ public:
      */
     void SetPC(WordType pc);
 
+    void ResetStateOnClearPipeline();
+
 private:
     bool           stall_ = false;
     bool           end_ = false;

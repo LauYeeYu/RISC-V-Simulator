@@ -19,13 +19,7 @@
 #include <utility>
 #include <cmath>
 
-Predictor::Predictor() : totalCorrect_(0), totalWrong_(0) {
-    for (auto& table : patternHistoryTable_) {
-        for (auto& entry : table.prediction) {
-            entry = true;
-        }
-    }
-}
+Predictor::Predictor() : totalCorrect_(0), totalWrong_(0) {}
 
 bool Predictor::Predict(WordType instructionAddress) {
     ByteType index = instructionAddress & kAnd;

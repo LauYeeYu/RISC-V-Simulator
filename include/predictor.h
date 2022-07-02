@@ -29,7 +29,7 @@ public:
     constexpr static SizeType kBucketSize = 4096; // the number of buckets to hold the data
     constexpr static WordType kAnd = 0b1111'1111'1111;
     struct PatternHistoryTable {
-        bool prediction[1 << kBitCount];
+        bool prediction[1 << kBitCount] = {false};
     };
 
     Predictor();

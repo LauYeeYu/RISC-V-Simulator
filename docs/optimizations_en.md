@@ -19,6 +19,9 @@ depend on other instructions.  Thus, we can do them in any order.  Another
 merit about it is that, we can boost the efficiency even by simply adding
 the number of ALU. That is called ***Tomasulo architecture***.
 
+On top these optimizations, we can also boost the efficiency of CPU by
+using the ***Cache*** and predicting the branch that will be taken.
+
 ## 5-Stage Pipeline
 
 ### The five stages of the pipeline
@@ -198,3 +201,33 @@ Instruction
 |                                      Memory                                         |
 +-------------------------------------------------------------------------------------+
 ```
+
+## Branch Prediction
+Branch prediction will make a great difference when there is a lot of
+branches.  A typical case that can show the advantage of the branch
+prediction is loop.  During the loop, the program will often go through
+the same loop again and again.  With a predictor, we can predict the branch
+that will be hit and then continue processing instructions.  Therefore,
+time is saved.  In the condition of great loops, the branch prediction
+will reduce the number of branches by a half or more.
+
+Typically, a predictor will predict the answer of the branch according to
+the history data.  The predicted result will be noted.  Then the instruction
+unit will decode the instruction at the predicted address and do things as
+if there is no branches.  When the real branch is calculated, we need to
+check whether the prediction is correct or not.  If correct, we just move
+to the next instruction.  If not, we need to clear the pipeline and set
+the PC to another address.
+
+## Cache
+The cache is a storage that hold only part of the data.  Cache is used to
+resolve the problem that the memory access is too slow.  Therefore, we use
+cache to speed up the memory access.
+
+Cache serves as a buffer between the memory and the CPU.  For the frequently
+visited data, we push it into the cache.  When we need the data, instead of
+getting the data from memory, we can get it from the cache.  When we need to
+write the data to memory, we can just write the data to the cache.  This may
+cause the data inconsistency.  Therefore, we use an extra bit called *dirty
+point* to indicate whether the data is modified or not.  If the *dirty* data
+must be removed from the cache, we need to write the data back to the memory.

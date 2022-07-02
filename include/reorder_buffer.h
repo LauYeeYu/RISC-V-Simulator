@@ -36,6 +36,7 @@ struct ReorderBufferEntry {
     ReorderType type;
     SizeType index;
     WordType value;
+    WordType address;
 };
 
 /**

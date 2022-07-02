@@ -124,8 +124,8 @@ void LoadStoreBuffer::MemoryIO(Bus& bus) {
 }
 
 void LoadStoreBuffer::ClearOnWrongPrediction() {
-    SizeType tail = (buffer_.TailIndex() + 1) % buffer_.MaxSize();
-    for (SizeType i = buffer_.HeadIndex(); i != tail; i = (i + 1) % buffer_.MaxSize()) {
+    SizeType tail = (buffer_.TailIndex() + 1) % buffer_.Capacity();
+    for (SizeType i = buffer_.HeadIndex(); i != tail; i = (i + 1) % buffer_.Capacity()) {
         if ((buffer_[i].type == Instruction::SB ||
              buffer_[i].type == Instruction::SH ||
              buffer_[i].type == Instruction::SW) && buffer_[i].ready) {
@@ -141,5 +141,5 @@ void LoadStoreBuffer::ClearOnWrongPrediction() {
 }
 
 SizeType LoadStoreBuffer::GetEndIndex() const {
-    return (buffer_.TailIndex() + 1) % buffer_.MaxSize();
+    return (buffer_.TailIndex() + 1) % buffer_.Capacity();
 }

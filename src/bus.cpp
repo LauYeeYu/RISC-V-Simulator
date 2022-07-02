@@ -66,3 +66,11 @@ void Bus::Run() {
 }
 
 long Bus::Clock() const { return clock_; }
+
+void Bus::UpdatePredictor(WordType instructionAddress, bool answer) {
+    instructionUnit_.GetPredictor().Update(instructionAddress, answer);
+}
+
+float Bus::PredictorAccuracy() const {
+    return instructionUnit_.PredictorAccuracy();
+}

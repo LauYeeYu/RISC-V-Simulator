@@ -100,6 +100,10 @@ public:
 
     void ResetStateOnClearPipeline();
 
+    Predictor& GetPredictor();
+
+    [[nodiscard]] float PredictorAccuracy() const;
+
 private:
     bool           stall_ = false;
     SignedWordType immediate_ = 0; // for JALR

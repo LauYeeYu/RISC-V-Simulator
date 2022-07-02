@@ -19,7 +19,7 @@
 
 #include "type.h"
 
-template<class T, int kSize>
+template<class T, SizeType kSize>
 class CircularQueue {
     friend class Iterator;
     friend class ConstIterator;
@@ -170,7 +170,7 @@ public:
 
     [[nodiscard]] SizeType HeadIndex() const { return head_; }
     [[nodiscard]] SizeType TailIndex() const { return (tail_ - 1 + kSize) % kSize; }
-    [[nodiscard]] constexpr SizeType MaxSize() const { return kSize; }
+    [[nodiscard]] constexpr SizeType Capacity() const { return kSize; }
 
     Iterator Begin() { return Iterator(*this, head_); }
     Iterator begin() { return Iterator(*this, head_); }

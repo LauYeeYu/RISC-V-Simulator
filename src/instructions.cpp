@@ -377,7 +377,8 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             } else {
                 rsEntry.Value2 = bus.GetRegisterFile().Read(info.register2);
             }
-            entry.predictedAnswer = predictor_.Predict();
+            entry.predictedAnswer = predictor_.Predict(PC_);
+            entry.address = PC_;
             if (entry.predictedAnswer) {
                 entry.index = PC_ + 4;
                 PC_ += static_cast<SignedWordType>(info.immediate);
@@ -559,3 +560,9 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
 void InstructionUnit::SetPC(WordType pc) { PC_ = pc; }
 
 void InstructionUnit::ResetStateOnClearPipeline() { stall_ = false; }
+
+Predictor& InstructionUnit::GetPredictor() { return predictor_; }
+
+float InstructionUnit::PredictorAccuracy() const {
+    return predictor_.GetAccuracy();
+}

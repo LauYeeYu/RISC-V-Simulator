@@ -19,9 +19,20 @@
 
 #include "type.h"
 
+/**
+ * @class Predictor
+ * A 4-bit two-level adaptive predictor
+ */
 class Predictor {
 public:
-    Predictor() = default;
+    constexpr static SizeType kBitCount = 4; // the number of bit that the predictor uses
+    constexpr static SizeType kBucketSize = 4096; // the number of buckets to hold the data
+    constexpr static WordType kAnd = 0b1111'1111'1111;
+    struct PatternHistoryTable {
+        bool prediction[1 << kBitCount];
+    };
+
+    Predictor();
     Predictor(const Predictor&) = default;
     Predictor(Predictor&&) = default;
 
@@ -30,16 +41,17 @@ public:
 
     ~Predictor() = default;
 
-    [[nodiscard]] bool Predict(/*TODO*/);
+    [[nodiscard]] bool Predict(WordType instructionAddress);
+
+    void Update(WordType instructionAddress, bool answer);
 
     [[nodiscard]] float GetAccuracy() const;
 
-    void PredictWrong();
-
 private:
-    SizeType predictCount = 0;
-    SizeType predictWrong = 0;
-    bool predict = false;
+    PatternHistoryTable patternHistoryTable_[kBucketSize];
+    ByteType history_[kBucketSize] = {0};
+    SizeType totalWrong_ = 0;
+    SizeType totalCorrect_ = 0;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_PREDICTOR_H

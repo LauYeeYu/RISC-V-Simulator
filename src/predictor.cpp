@@ -16,7 +16,36 @@
 
 #include "predictor.h"
 
-bool Predictor::Predict() {
-    predict = ~predict;
-    return predict;
+#include <utility>
+#include <cmath>
+
+Predictor::Predictor() : totalCorrect_(0), totalWrong_(0) {
+    for (auto& table : patternHistoryTable_) {
+        for (auto& entry : table.prediction) {
+            entry = true;
+        }
+    }
+}
+
+bool Predictor::Predict(WordType instructionAddress) {
+    ByteType index = instructionAddress & kAnd;
+    return patternHistoryTable_[index].prediction[history_[index]];
+}
+
+void Predictor::Update(WordType instructionAddress, bool answer) {
+    ByteType index = instructionAddress & kAnd;
+    if (patternHistoryTable_[index].prediction[history_[index]] == answer) {
+        totalCorrect_++;
+    } else {
+        totalWrong_++;
+    }
+    patternHistoryTable_[index].prediction[history_[index]] = answer;
+    history_[index] = history_[index] >> 1 | (answer ? 0b1000 : 0);
+}
+
+float Predictor::GetAccuracy() const {
+    if (totalCorrect_ + totalWrong_ == 0) {
+        return NAN;
+    }
+    return static_cast<float>(totalCorrect_) / static_cast<float>(totalCorrect_ + totalWrong_);
 }

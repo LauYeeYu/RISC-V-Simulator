@@ -53,6 +53,10 @@ public:
 
     [[nodiscard]] ReservationStation& GetReservationStation();
 
+    void UpdatePredictor(WordType instructionAddress, bool answer);
+
+    [[nodiscard]] float PredictorAccuracy() const;
+
 private:
     void Flush();
 

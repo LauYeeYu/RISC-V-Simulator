@@ -68,8 +68,6 @@ public:
 
     [[nodiscard]] bool Full() const;
 
-    [[nodiscard]] SizeType GetHead() const;
-
     SizeType Add(const ReorderBufferEntry& entry, Bus& bus);
 
     void Clear();

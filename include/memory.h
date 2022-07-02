@@ -36,10 +36,6 @@ public:
     void StoreHalfWord(SizeType index, HalfWordType value);
     void StoreByte(SizeType index, ByteType value);
 
-    void ResetReadyState();
-
-    bool Ready() const;
-
     /**
      * Init from stdin.
      */
@@ -47,8 +43,6 @@ public:
 
 private:
     ByteType* memory_;
-
-    mutable bool ready_ = true;
 };
 
 #endif //RISC_V_SIMULATOR_INCLUDE_MEMORY_H

@@ -19,5 +19,5 @@
 int main() {
     Bus bus;
     bus.Run();
-    return 0;;
+    return 0;
 }

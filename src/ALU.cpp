@@ -29,26 +29,12 @@ void ALU::Flush() {
     index = nextIndex;
 }
 
-WordType ALU::Result() const {
-    return result;
-}
+WordType ALU::Result()   const { return result;   }
+WordType ALU::Index()    const { return index;    }
+bool     ALU::Busy()     const { return busy;     }
+bool     ALU::Finished() const { return finished; }
 
-WordType ALU::Index() const {
-    return index;
-}
-
-
-bool ALU::Busy() const {
-    return busy;
-}
-
-bool ALU::Finished() const {
-    return finished;
-}
-
-void ALU::Clear() {
-    busy = false;
-}
+void ALU::Clear() { busy = false; }
 
 void AddALU::Execute(WordType input1, WordType input2, SizeType place, Instruction instruction) {
     busy = true;

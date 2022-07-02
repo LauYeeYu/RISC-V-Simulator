@@ -84,14 +84,6 @@ while (std::cin >> token) {
     }
 }
 
-void Memory::ResetReadyState() {
-    ready_ = true;
-}
-
-bool Memory::Ready() const {
-    return ready_;
-}
-
 WordType Memory::ReadInstruction(SizeType index) const {
     return *(reinterpret_cast<WordType*>(memory_ + index));
 }

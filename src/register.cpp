@@ -55,7 +55,9 @@ Register& Register::operator+=(SignedWordType rhs) {
     return *this;
 }
 
-WordType RegisterFile::Read(SizeType index) { return static_cast<WordType>(registers_[index]); }
+WordType RegisterFile::Read(SizeType index) {
+    return static_cast<WordType>(registers_[index]);
+}
 
 void RegisterFile::Write(SizeType index, WordType value, SizeType dependency) {
     if (index != 0) {

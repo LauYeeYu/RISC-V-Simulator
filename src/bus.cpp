@@ -38,29 +38,13 @@ void Bus::Flush() {
     reservationStation_.Flush();
 }
 
-void Bus::SetPC(WordType pc) {
-    instructionUnit_.SetPC(pc);
-}
+void Bus::SetPC(WordType pc) { instructionUnit_.SetPC(pc); }
 
-Memory& Bus::GetMemory() {
-    return memory_;
-}
-
-ReorderBuffer& Bus::GetReorderBuffer() {
-    return reorderBuffer_;
-}
-
-LoadStoreBuffer& Bus::GetLoadStoreBuffer() {
-    return loadStoreBuffer_;
-}
-
-RegisterFile& Bus::GetRegisterFile() {
-    return registerFile_;
-}
-
-ReservationStation& Bus::GetReservationStation() {
-    return reservationStation_;
-}
+Memory&             Bus::GetMemory()             { return memory_;             }
+ReorderBuffer&      Bus::GetReorderBuffer()      { return reorderBuffer_;      }
+LoadStoreBuffer&    Bus::GetLoadStoreBuffer()    { return loadStoreBuffer_;    }
+RegisterFile&       Bus::GetRegisterFile()       { return registerFile_;       }
+ReservationStation& Bus::GetReservationStation() { return reservationStation_; }
 
 void Bus::ClearPipeline() {
     registerFile_.ResetDependency();
@@ -79,9 +63,6 @@ void Bus::Run() {
         ++clock_;
         Flush();
     }
-
 }
 
-long Bus::Clock() const {
-    return clock_;
-}
+long Bus::Clock() const { return clock_; }

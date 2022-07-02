@@ -62,17 +62,10 @@ void ReorderBuffer::TryCommit(Bus& bus) {
     nextBuffer_.Pop();
 }
 
-void ReorderBuffer::Flush() {
-    buffer_ = nextBuffer_;
-}
+void ReorderBuffer::Flush() { buffer_ = nextBuffer_; }
+void ReorderBuffer::Clear() { nextBuffer_.Clear(); }
 
-SizeType ReorderBuffer::GetHead() const {
-    return buffer_.HeadIndex();
-}
-
-bool ReorderBuffer::Full() const {
-    return buffer_.Full();
-}
+bool ReorderBuffer::Full() const { return buffer_.Full(); }
 
 SizeType ReorderBuffer::Add(const ReorderBufferEntry& entry, Bus& bus) {
     nextBuffer_.Push(entry);
@@ -80,10 +73,6 @@ SizeType ReorderBuffer::Add(const ReorderBufferEntry& entry, Bus& bus) {
         bus.GetRegisterFile().AboutToWrite(entry.index, nextBuffer_.TailIndex());
     }
     return nextBuffer_.TailIndex();
-}
-
-void ReorderBuffer::Clear() {
-    nextBuffer_.Clear();
 }
 
 const ReorderBufferEntry& ReorderBuffer::GetEntry(SizeType index) const {

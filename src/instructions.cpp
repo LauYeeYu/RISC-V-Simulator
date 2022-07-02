@@ -26,8 +26,6 @@
 #include "type.h"
 
 InstructionUnit::InstructionUnit() : stall_(false),
-                                     end_(false),
-                                     endDependency_(0),
                                      immediate_(0),
                                      dependency_(0),
                                      PC_(),
@@ -43,9 +41,7 @@ SizeType GetDestinationRegister(WordType instruction) { return (instruction >>  
 SizeType GetRegister1          (WordType instruction) { return (instruction >> 15) & 0b11111; }
 SizeType GetRegister2          (WordType instruction) { return (instruction >> 20) & 0b11111; }
 
-WordType SignedExtend(WordType value) {
-    return (value & 0x800) ? (value | 0xFFFFF000) : value;
-}
+WordType SignExtend(WordType value) { return (value & 0x800) ? (value | 0xFFFFF000) : value; }
 
 /// 31:12 imm[31:12]
 WordType GetUpperImmediate(WordType instruction) { return instruction & 0xFFFFF000; }
@@ -54,7 +50,7 @@ WordType GetUpperImmediate(WordType instruction) { return instruction & 0xFFFFF0
 WordType GetUnsignedLowerImmediate(WordType instruction) { return (instruction >> 20) & 0xFFF; }
 
 WordType GetSignedLowerImmediate(WordType instruction) {
-    return SignedExtend(GetUnsignedLowerImmediate(instruction));
+    return SignExtend(GetUnsignedLowerImmediate(instruction));
 }
 
 /// 31:12 imm[20|10:1|11|19:12]
@@ -79,7 +75,7 @@ WordType GetBranchImmediate(WordType instruction) {
 WordType GetStoreImmediate(WordType instruction) {
     WordType immediate = (instruction >> 7) & 0b11111; // 4:0
     immediate |= (instruction >> 20) & 0xFE0; // 10:5
-    return SignedExtend(immediate);
+    return SignExtend(immediate);
 }
 
 /// 24:20 shift amount
@@ -293,17 +289,17 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
         }
         return;
     }
-    if (bus.GetReorderBuffer().Full() || bus.GetLoadStoreBuffer().Full()) {
-        return;
-    }
+    if (bus.GetReorderBuffer().Full() || bus.GetLoadStoreBuffer().Full()) return;
+
     WordType currentInstruction = bus.GetMemory().ReadInstruction(PC_);
-    if (currentInstruction == 0x0ff00513) {
+    if (currentInstruction == 0x0ff00513) { // the end instruction
         ReorderBufferEntry entry;
         entry.ready = true;
         entry.type = ReorderType::end;
         bus.GetReorderBuffer().Add(entry, bus);
         return;
     }
+
     InstructionInfo info = GetInstructionInfo(currentInstruction);
     switch (info.instruction) {
         case Instruction::LUI: { // Load Upper Immediate
@@ -560,8 +556,6 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
     }
 }
 
-void InstructionUnit::SetPC(WordType pc) {
-    PC_ = pc;
-}
+void InstructionUnit::SetPC(WordType pc) { PC_ = pc; }
 
 void InstructionUnit::ResetStateOnClearPipeline() { stall_ = false; }

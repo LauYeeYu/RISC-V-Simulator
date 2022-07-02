@@ -1,9 +1,13 @@
-# RISC-V Simluator
+# RISC-V Simulator
 
 This program is a RISC-V simulator written by C++.  It is a simple RISC-V
 simulator that can simulate simplified RV32I instructions.
 
 此項目是由 C++ 程式碼編寫的 RISC-V 模擬器。它可以模擬簡化 RV32I 指令的模擬器。
+
+## Architecture 架構
+- tomasulo algorithm
+- 4-bit two-level local adaptive predictor 四位元兩級局部預測
 
 ## Supported Instructions 支援指令
 | Instruction | Description                         |

@@ -93,6 +93,11 @@ simulator that can simulate simplified RV32I instructions.
 |   0000000    |     rs2     |     rs1     | 111 |     rd      | 0110011 | AND
 ```
 
+## How to Use 使用方法
+Compile the code with `CMake` and run the executable file.
+
+透過 `Cmake` 編譯程式并執行。
+
 ## Performance optimizations 性能優化
 ### Branch Predictor Performance 分支預測性能
 |   Test Case    | Success Rate | Total CPU Clock (Predicted) | Total CPU Clock (Always taken) |

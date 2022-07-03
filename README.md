@@ -93,8 +93,9 @@ simulator that can simulate simplified RV32I instructions.
 |   0000000    |     rs2     |     rs1     | 111 |     rd      | 0110011 | AND
 ```
 
-## Branch Predictor Performance 分支預測性能
-|    Testcase    | Success Rate | Total CPU Clock (Predicted) | Total CPU Clock (Always taken) |
+## Performance optimizations 性能優化
+### Branch Predictor Performance 分支預測性能
+|   Test Case    | Success Rate | Total CPU Clock (Predicted) | Total CPU Clock (Always taken) |
 |:--------------:|:------------:|:---------------------------:|:------------------------------:|
 |  array_test1   |    54.55%    |             254             |              268               |
 |  array_test2   |    50.00%    |             299             |              311               |
@@ -106,7 +107,7 @@ simulator that can simulate simplified RV32I instructions.
 |    lvalue2     |    66.67%    |             57              |               64               |
 |     magic      |    76.27%    |           725310            |             871425             |
 | manyarguments  |    80.00%    |             68              |               88               |
-|   multiarray   |    56.79%    |            2962             |              115               |
+|   multiarray   |    56.79%    |            2962             |              2841              |
 |     naive      |     N/A      |             33              |               33               |
 |       pi       |    81.49%    |          137659899          |           173119132            |
 |     qsort      |    91.70%    |           1474485           |            1810504             |
@@ -114,6 +115,45 @@ simulator that can simulate simplified RV32I instructions.
 | statement_test |    62.87%    |            1413             |              1576              |
 |   superloop    |    91.85%    |           645199            |            1744502             |
 |      tak       |    70.34%    |           2622430           |            2622437             |
+
+### Multiple ALU units 多計算單元
+The simulator have 4 types of ALU units:
+模擬程式執行器有 4 種計算單元:
+- Add ALU
+  加減法計算單元
+- Shift ALU
+  左右移轉計算單元
+- Logic ALU
+  邏輯計算單元
+- Set ALU
+  比較計算單元
+
+Each kind of ALUs unit can have more than one ALU units.  The following table
+shows the performance on multiple ALU units.
+
+各類計算單元可以有多個計算單元。下表顯示多個計算單元的性能。
+
+|   Test Case    | Total CPU Clock (2 * 4) | Total CPU Clock (1 * 4) |
+|:--------------:|:-----------------------:|:-----------------------:|
+|  array_test1   |           254           |           257           |
+|  array_test2   |           299           |           302           |
+|   basicopt1    |         633032          |         633122          |
+|   bulgarian    |         446440          |         446968          |
+|      expr      |           914           |           930           |
+|      gcd       |           602           |           602           |
+|     hanoi      |         290233          |         291349          |
+|    lvalue2     |           57            |           58            |
+|     magic      |         725310          |         729414          |
+| manyarguments  |           68            |           69            |
+|   multiarray   |          2962           |          2964           |
+|     naive      |           33            |           33            |
+|       pi       |        137659899        |        138222807        |
+|     qsort      |         1474485         |         1476714         |
+|     queens     |         899030          |         907405          |
+| statement_test |          1413           |          1426           |
+|   superloop    |         645199          |         754101          |
+|      tak       |         2622430         |         2622430         |
+
 
 ## License 許可證
 

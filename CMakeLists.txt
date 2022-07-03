@@ -13,8 +13,8 @@ elseif (DEFINED LAU_SHOW_REGISTER_DETAILS)
     if (DEFINED LAU_TEST)
         set(CMAKE_CXX_FLAGS "-DLAU_TEST")
     endif()
-    elseif (DEFINED LAU_TEST)
-    set(CMAKE_CXX_FLAGS "-DLAU_TEST")
+elseif (DEFINED LAU_TEST)
+set(CMAKE_CXX_FLAGS "-DLAU_TEST")
 endif()
 
 set(SIMULATOR_INCLUDES
@@ -32,5 +32,5 @@ set(SIMULATOR_SOURCES
         src/reservation_station.cpp
         src/load_store_buffer.cpp)
 
-add_executable(code ${SIMULATOR_INCLUDES} ${SIMULATOR_SOURCES})
-target_include_directories(code PRIVATE ${SIMULATOR_INCLUDES})
+add_executable(RISC-V-Simulator ${SIMULATOR_INCLUDES} ${SIMULATOR_SOURCES})
+target_include_directories(RISC-V-Simulator PRIVATE ${SIMULATOR_INCLUDES})

@@ -1,5 +1,5 @@
 cmake-build-*/
-test*/
+test/
 **/*.o
 **/*.a
 *.log

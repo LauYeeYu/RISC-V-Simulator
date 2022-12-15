@@ -312,9 +312,16 @@ void InstructionUnit::FetchAndPush(Bus& bus) {
             PC_ += 4;
             break;
         }
-        case Instruction::AUIPC: // Add Upper Immediate to PC
-            PC_ += static_cast<SignedWordType>(info.immediate);
+        case Instruction::AUIPC: { // Add Upper Immediate to PC
+            ReorderBufferEntry entry;
+            entry.type = ReorderType::registerWrite;
+            entry.ready = true;
+            entry.value = info.immediate + PC_;
+            entry.index = info.destinationRegister;
+            bus.GetReorderBuffer().Add(entry, bus);
+            PC_ += 4;
             break;
+        }
         case Instruction::JAL: { // Jump and Link
             ReorderBufferEntry entry;
             entry.type = ReorderType::registerWrite;

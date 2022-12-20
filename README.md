@@ -10,45 +10,45 @@ simulator that can simulate simplified RV32I instructions.
 - 4-bit two-level local adaptive predictor 四位元兩級局部預測
 
 ## Supported Instructions 支援指令
-| Instruction | Description                         |
-|:-----------:|-------------------------------------|
-|     LUI     | Load Upper Immediate                |
-|    AUIPC    | Add Upper Immediate to PC           |
-|     JAL     | Jump and Link                       |
-|    JALR     | Jump and Link Register              |
-|     BEQ     | Branch if Equal                     |
-|     BNE     | Branch if Not Equal                 |
-|     BLT     | Branch if Less Than                 |
-|     BGE     | Branch if Greater Than              |
-|    BLTU     | Branch if Less Than Unsigned        |
-|    BGEU     | Branch if Greater Than Unsigned     |
-|     LB      | Load Byte                           |
-|     LH      | Load Halfword                       |
-|     LW      | Load Word                           |
-|     LBU     | Load Byte Unsigned                  |
-|     LHU     | Load Halfword Unsigned              |
-|     SB      | Store Byte                          |
-|     SH      | Store Halfword                      |
-|     SW      | Store Word                          |
-|    ADDI     | Add Immediate                       |
-|    SLTI     | Set on Less Than Immediate          |
-|    SLTIU    | Set on Less Than Immediate Unsigned |
-|    XORI     | Exclusive OR Immediate              |
-|     ORI     | OR Immediate                        |
-|    ANDI     | AND Immediate                       |
-|    SLLI     | Shift Left Logical                  |
-|    SRLI     | Shift Right Logical                 |
-|    SRAI     | Shift Right Arithmetic              |
-|     ADD     | Add                                 |
-|     SUB     | Subtract                            |
-|     SLL     | Shift Left Logical                  |
-|     SLT     | Set on Less Than                    |
-|    SLTU     | Set on Less Than Unsigned           |
-|     XOR     | Exclusive OR                        |
-|     SRL     | Shift Right Logical                 |
-|     SRA     | Shift Right Arithmetic              |
-|     OR      | OR                                  |
-|     AND     | AND                                 |
+| Instruction | Description                              |
+|:-----------:|------------------------------------------|
+|     LUI     | Load Upper Immediate                     |
+|    AUIPC    | Add Upper Immediate to PC                |
+|     JAL     | Jump and Link                            |
+|    JALR     | Jump and Link Register                   |
+|     BEQ     | Branch if Equal                          |
+|     BNE     | Branch if Not Equal                      |
+|     BLT     | Branch if Less Than                      |
+|     BGE     | Branch if Greater Than or Equal          |
+|    BLTU     | Branch if Less Than Unsigned             |
+|    BGEU     | Branch if Greater Than or Equal Unsigned |
+|     LB      | Load Byte                                |
+|     LH      | Load Halfword                            |
+|     LW      | Load Word                                |
+|     LBU     | Load Byte Unsigned                       |
+|     LHU     | Load Halfword Unsigned                   |
+|     SB      | Store Byte                               |
+|     SH      | Store Halfword                           |
+|     SW      | Store Word                               |
+|    ADDI     | Add Immediate                            |
+|    SLTI     | Set on Less Than Immediate               |
+|    SLTIU    | Set on Less Than Immediate Unsigned      |
+|    XORI     | Exclusive OR Immediate                   |
+|     ORI     | OR Immediate                             |
+|    ANDI     | AND Immediate                            |
+|    SLLI     | Shift Left Logical                       |
+|    SRLI     | Shift Right Logical                      |
+|    SRAI     | Shift Right Arithmetic                   |
+|     ADD     | Add                                      |
+|     SUB     | Subtract                                 |
+|     SLL     | Shift Left Logical                       |
+|     SLT     | Set on Less Than                         |
+|    SLTU     | Set on Less Than Unsigned                |
+|     XOR     | Exclusive OR                             |
+|     SRL     | Shift Right Logical                      |
+|     SRA     | Shift Right Arithmetic                   |
+|     OR      | OR                                       |
+|     AND     | AND                                      |
 
 ### Instruction Format
 ```text
